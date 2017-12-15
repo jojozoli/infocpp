@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8"/>
+		<title>InfoC++2 :: Főoldal</title>
+
+		<script src="js/prism.js"></script>
+	</head>
+
+	<body>
+		<h4>Üdv az InfoC++2 oldalán!</h4>
+		<hr>
+
+		<p>Ez az oldal a BMEVIIIAA00 tárgyhoz készült a C++ programozás tanulásának elősegítéséhez.</p>
+
+		<p>Az oldalon olyan tananyagok találhatóak, melyek a C nyelv és a programozás alapvető ismeretire építenek.</p>
+
+		<pre><code class="language-cpp highlight">
+			std::string InfoCpp2::getMenu(std::string menu)
+				if(menu == "Info") 		return "Követelmények, aktualitások";
+				if(menu == "Tananyag") 	return "Témakörökre bontott kiegészítő tananyag";
+				if(menu == "Extrák") 	return "Függelék, érdekességek, HFTest használata";
+				if(menu == "Kapcsolat") return "Az oldal készítője, copyright, elérhetőség";
+				return "Valami más";
+			}
+		</code></pre>
+
+		<p>Az oldalon található kódrészletek szabadon felhasználhatóak, továbbfejleszthetőek.</p>
+
+	</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8"/>
+		<title>InfoC++ :: Tananyag</title>
+		<script type="text/javascript" src="js/prism.js"></script>
+	</head>
+	<body>
+		<h4>2: OOP alapok</h4><hr>
+
+		<p>
+			Ebben a fejezetben az objektum orientált programozás alapelveivel és annak C++ megvalósításával foglalakozunk.
+		</p><hr>
+						
+		<h5>Az objektum orientált programozás</h5>
+		<p>A C++ megalkotásának egyik fő szempontja az objektum orientált programozás bevezetése (A C-ben használt procedurális programozás<sup>*</sup> felváltására).</p>
+		<p>Az OOP középpontjában az objektum áll, mely egy olyan dolog ami tulajdonságokkal és rajta elvégezhető műveletekkel rendelkezik.</p>
+		<blockquote>Például az autó egy objektum.<br><b>Tulajdonságai:</b> szín, fogyasztás, ülések száma, stb.<br><b>Rajta végezhető műveletek:</b> vezetés, fékezés, váltás, stb.</blockquote>
+		<small>* - Olyan programozás, ahol csak globális függvényeket használunk a műveletekhez végrehajtására.</small>
+		
+		<h5>Objektum és osztály</h5>
+		<p>Ismerkedjünk meg az OOP-ben használatos terminológiával, definíciókkal.</p>
+		<p><b>Objektum</b>: Az OOP alapegysége, mely tulajdonságok és az azon végzett műveletek egyesítéséből áll.</p>
+		<p><b>Osztály</b>: Az objektumok "tervrajza", mely önmagában nem határoz meg konkrétumokat, csak leírja, hogy az az objektum miként néz ki és hogyan viselkedik.</p>
+		<p><b>Példány</b>: Egy olyan osztályelem, ami specifikálja az objektumot úgy, hogy az megfeleljen az osztályban leírt váznak.</p>
+
+		<blockquote>
+			Az autós példában<br>
+			<b>Objektum:</b> Az autó, mint fogalom.<br>
+			<b>Osztály:</b> Egy autógyárban az autó tervrajza.<br>
+			<b>Példány:</b> A saját autónk.<br>
+		</blockquote>
+
+		<p>Sajnos az osztály és az objektum kifejezést nem szoktuk megkülönbözetni, így ezekután mi is élünk ezen szokásjoggal.</p>
+		
+		<h5>Az OOP alapelvek</h5>
+		<p>Egy modern OOP nyelvnek meg kell felelnie néhány alapelvnek (axiómának).</p>
+		<p><b>Abstraction</b>: Egy objektum mindig csak a legszükségesebb elemeit "mutassa" a külvilágnak, a belső működését rejtse el.</p>
+		<p><b>Encapsulation</b>: Egy objektum álljon logikailag összetartozó tulajdonságokból és műveletekből.</p>
+		<p><b>Inheritance</b>: Az objektumok álljanak hierarchiában, egy fejjebb lévő osztály elemeit felhasználhatja a lejjebb lévő.</p>
+		<p><b>Polymorphism</b>: Egy objektum legy többféle módon használahtó, és több hasonló objektum viselkedjen hasonlóan. (Ebből következik az Overload)</p>
+		<p><b>Overload</b>: Egy objektum legyen képes felülírni, átalalakítani saját működését az őseihez képest.</p>
+		
+		<p>Az elkövetkezendő fejezetekben megnézzük, hogy a C++ hogyan valósítja meg az OOP alapelveket.</p>
+		<small>Ezen az oldalon ezentúl a tulajdonságokat adattagnak a műveleteket metódusnak nevezzük.</small>
+		
+		<hr>		
+		
+		<h5>Osztályok létrehozása és példányosítása</h5>
+		<p>Osztályokat a <b>class</b> kulcsszóval hozhatunk létre. Az adattagokat változószerűen, a metódusokat függvényszerűen deklarálunk. Ezzel megvalósítjuk az <b>Encapsulation</b> alapelvet.</p>
+		<p>Ezután az osztályunk használható mint "típus", azaz példányokat hozhatunk létre az osztályunkból.</p>
+		<pre><code class="language-cpp">
+		class Rectangle			// Osztály meghatározása
+		{
+			int a, b;			// Adattagok
+			int area();			// Metódus
+			void grow(int by);	// Metódus paraméterrel
+		}; // &lt;-- Ide kell a pontosvessző
+		// ...
+		Rectangle myRect;		// A myRect egy példánya a Rectangle osztálynak
+		</code></pre>
+		
+		<h5>Adattagok és metódusok elérése és létrehozása</h5>
+		<p>Első megközelítésben kétféle adattag és metódus láthatóság létezik</p>
+		<p><b>public</b>: az adattagot vagy metódust kívülről is elérhetik a <b>.</b> operátorral</p>
+		<p><b>private</b>: az adattagot vagy metódust csak az objetum metódusai látják</p>
+		<p>A megfelelő kulcsszó kiírása után a megfelelő láthatóság lesz beállítva az utána következő adattagokon és metódusokon. Ezzel megvalósítjuk az Abstraction alapelvet.</p>
+		<pre><code class="language-cpp">
+		class Rectangle
+		{
+			private:
+			int a, b;			// Ezeket az adattagokat csak a Rectangle osztályból látható
+			
+			public:
+			int area();			// Ezek a metódusok láthatók kívülről is
+			void grow(int by);
+		};
+		// ...
+		Rectangle myRect;
+		myRect.a = 6;			// Hiba: privát adattagot nem lehet módosítani
+		int ar = myRect.area();	// Publikus metódus hívható, hivatkozni a . operátorral lehet rá
+		</code></pre>
+		
+		<p>Metódusokat lehet az osztálydefiníción belül vagy azon külön is definiálni. Metóduson beül az adattagok nevére azok nevével hivatkozunk. Ha a paraméterlistán van azonos nevű paraméter mint adattag, akkor a <b>this-&gt;</b> kulcsszóval hivatkozhatunk az adott példány adattagjára. Használható alapértelmezett argumentum.</p>
+		
+		<pre><code class="language-cpp">
+		class Rectangle
+		{
+			private:
+			int a, b;
+			
+			public:
+			int area()					// Belül definiált függvény
+			{
+				return a * b;			// Hivatkozunk az adattagokra
+			}
+			void grow(int by = 1);		// Használható alapértelmezett paraméter
+			void add(int a, int b);
+		};
+		// ...
+		// Külső definiáláskor az :: operátor bal oldalán az osztály van, jobb oldalán a metódus
+		void Rectangle::grow(int by)
+		{
+			a *= by; b *= by;			// Innen is hivatkozhatunk adattagokra
+		}
+		
+		void Rectangle::add(int a, int b)
+		{
+			// Ha ugyanaz a paraméter neve, mint egy adattagé akkor az adattag 
+			// a this-&gt; kulcsszóval érhető el
+			this-&gt;a += a;
+			this-&gt;b += b;
+		}
+		</code></pre>
+		
+		<h5>Alapértelmezett metódusok</h5>
+		<p>Alapértelmezetten minden osztálynak létezik néhány metódusa.</p>
+		<p><b>Konstruktor</b>: a példány létrehozásakor lefutó kód, (ha ezt nem írtuk felül)</p>
+		<p><b>Destruktor</b>: a példány megszűnésekor lefutó kód</p>
+		<p><b>Másoló konstruktor</b>: amikor egy példánynak egy másik példányt adunk értékül, (aminek ezután átmásolódnak adattagjai) ez a kód fut le</p>
+		<p><b>Értékadó opertátor</b>: amikor egy példánynak egy másik példányt adunk értékül (de egy az egyben átadódik)</p>
+		<p><b>Dereferálás és címképzés</b>: a <b>*</b> és <b>&amp;</b> operátorok</p>
+		<pre><code class="language-cpp">
+		class Rectangle
+		{
+			private:
+			int a, b;
+			
+			public:
+			// Konstruktor - visszatérés nélküli, a neve az osztály neve
+			Rectangle() { a = 0; b = 0; }
+			// Destruktor  - visszatérés nélküli, az osztálnév elé tett ~ jelöli							
+			~Rectangle() { a = NULL; b = NULL; }
+		};
+		// ...
+		Rectangle a;		// Ha ezt írjuk lefut a konstruktor
+		Rectangle b (a);	// Másoló konstruktor
+		Rectangle c = b;	// Értékadó operátor
+		Rectangle* d = &amp;a;	// Pointer és dereferálás
+		</code></pre>
+		
+		<h5>Metódusok és operátorok túlterhelése</h5>
+		<p>A túlterhelés azt jelenti, hogy felülírjuk a metódust vagy operátort.</p>
+		<p>Például amikor írunk egy saját konstruktort, azzal túlterheljük az alapértelmezett konstruktort.</p>
+		<p>Az operátorokat az <b>operator</b> kulcsszóval terhelhetjük túl ugyanúgy, mint egy függvényt. (Ezentúl az opertárt is metódusként kezelhetjük). Az operátor túlterhelésnél a bal oldali operátor maga az osztály. Ha jobb oldaliként szeretnénk, akkor globális túlterhelés kell.</p>
+		<p>Ezzel megvalósítjuk az Overload alapelvet.</p>
+		<pre><code class="language-cpp">
+		class Frac
+		{
+			private:
+			int numerator, denominator;
+			
+			public:
+			// Konstruktor túlterhelés
+			Frac(int nom = 1, int denom = 1){ numerator = nom; denominator = denom; }
+			// Operátor túlterhelés
+			Frac operator* (const Frac&amp; rhs)
+			{
+				Frac ret;
+				ret.numerator   = this-&gt;numerator   * rhs.numerator;
+				ret.denominator = this-&gt;denominator * rhs.denominator;
+				return ret;
+			}
+		};						
+		</code></pre>
+		
+		<h5>Globális operátor túlterhelés</h5>
+		<p>Bármely bal és jobb oldali típussal megadott operátor felülírható.</p>
+
+		<pre><code class="language-cpp">
+		// Általánosan
+		VisszaTípus operatorX(BalTípus lhs, JobbTípus rhs);
+		
+		// Példa - ostream kiírás (Rectangle egy osztály)
+		std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, Rectangle r)
+		{
+			os &lt;&lt; r.getA() &lt;&lt; r.getB();	// Kiírás az ostreamre (pl. std::cout)
+			return os;					// A &lt;&lt; operátor láncolhatósága miatt
+		}
+		</code></pre>
+		
+		<h5>Inicializáló lista</h5>
+		<p>Az inicializáló listával könnyen adhatunk értéket az adattagoknak rövid, tömör alakban a függvény deklarációban. Továbbá konstans és referencia adattagok inicializálásának elvégzéséhez <b>kötelező</b> a használata.</p>
+		<p>A függvénydefiníció után tett <b>:</b> jel után következik a lista <b>adattag(paraméter)</b> alakban, vesszővel elválasztva. Így a megadott adattagot beállítjuk a megadott paraméter értékére.</p>
+		<pre><code class="language-cpp">
+		class Circle
+		{
+			const double pi;
+			double r;
+			
+			public:
+			// Beállítjuk az r és a konstans pi értékét
+			Circle(double x) : r(x), pi(3.1415) { }
+		};
+		</code></pre>
+		
+		<h5>A friend függvények</h5>
+		<p>A <b>friend</b> kulcsszó utáni külső függvények hozzáférhetnek a privát adattagokhoz.</p>
+		<p><b>Az ilyen függvények használata erősen nem ajánlott!</b></p>
+		<pre><code class="language-cpp">
+		class Circle
+		{
+			double r;
+			
+			public:
+			// Az Area függvény a barátja a Circle osztálynak
+			friend double Area(Circle c);
+		};
+		// ...
+		double Area(Circle c)
+		{
+			// Elérhetők a privát adattagok
+			return c.r * c.r * 3.14;
+		}
+		</code></pre>
+	</body>
+</html>

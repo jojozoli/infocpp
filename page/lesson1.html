@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8"/>
+		<title>InfoC++ :: Tananyag</title>
+		<script type="text/javascript" src="js/prism.js"></script>
+	</head>
+	<body>
+		<h4>1: C és C++ eltérések</h4><hr>
+		
+		<p>
+			Ebben a fejezetben a C nyelvről a C++ nyelvre való áttérést vezetjük végig lépésről lépésre. 
+			Megismerkedünk a különbségekkel és újdonságokkal.
+		</p><hr>
+
+		<h5>Logikai típus</h5>
+		<p>A C++ alapértelmezeten tartalmazza a logikai típust, melynek csak két értéke lehet <b>true</b> vagy <b>false</b>.</p>
+		<p>Típuskonverziónál a 0 érték <b>false</b> lesz minden más <b>true</b>.</p>
+		<pre><code class="language-cpp">
+		bool a = false;
+		a = 3; // a ilyenkor true értéket kap
+		</code></pre>
+	
+	
+		<h5>Struktúrák</h5>
+		<p>A struktúrák a C nyelvtől eltérően azonnal típusként értelmeződnek, tehát később nem kell a <b>struct</b> vagy a <b>typedef</b> kulcsszót használni.</p>
+		<small>Később látni fogjuk, hogy a struktúrák egyéb tulajdonságokat is szereztek.</small>
+		<pre><code class="language-cpp">
+		struct ListaElem {
+			int adat;
+			ListaElem* kovetkezo; // nincs szükség a struct kulcsszóra
+		};
+		</code></pre>
+		
+		<h5>Konstansok</h5>
+		<p>Egy konstans változó értékét <b>csak egyszer lehet</b> megadni, onnantól kezdve értéke csak olvasható. A C++-ban konstans változót a típusnév elé írt <b>const</b> kulcsszóval lehet létrehozni.</p>
+		<p>Pointer típusoknál mindig a <b>const</b> kulcsszó utáni objektum lesz nem módosítható.</p>
+		<p>A konstansok pointeren vagy függvényen keresztül sem módosíthatóak.</p>
+		<pre><code class="language-cpp">
+		int const a = 5;	// Az a változó csak olvasható, értéke 5
+		const int a = 5;	// Ugyanaz mint a felső, a C-s kompatibilitás miatt használható
+		const char* p;		// A p által mutatott érték nem változhat
+		char* const p;		// A p-ben tárolt cím nem változhat
+		</code></pre>
+		
+		<h5>Felsorolás típus</h5>
+		<p>A felsorolás típus szigorúbb C++-ban. Egy felsorolás típusú változó értékeire nem lehet a megfelelő számértékkel hivatkozni. Csakis valamelyik felsorolt elem vagy a tömbszerű eléréssel hivatkozhatók.</p>
+		<p>Csakúgy mint a struktúrák, a felsorolás típusú változók is automatikusan típusként értelmezendőek.</p>
+		<pre><code class="language-cpp">
+		enum Szamok {
+			NULLA, EGY, KETTO, HAROM, TIZENOT = 15
+		};
+		
+		Szamok a = 2;			// Fordítási hiba - így nem lehet hivatkozni
+		Szamok b = KETTO;		// Működik - felsorolt elem
+		Szamok c = Szamok(2);	// Működik - tömbszerű megadás
+		Szamok d = Szamok(19); 	// Lefordul - meghatározatlan érték (szemantikai hibához vezethet)
+		</code></pre>
+		
+		<h5>Referencia típus</h5>
+		<p>A referencia típus egy már létező változónak ad egy alternatív nevet. Így ugyanarra a memóriaterületre többféle névvel is hivatkozhatunk. Emiatt <b>kötelező</b> értéket adni deklaráláskor.</p>
+		<p>Ezt például függvényparaméter átadáskor ki lehet használni, mivel nem kell pointereket alkalmazni &rarr; egyszerűsödik a kód.</p>
+		<p>Referencia típust deklarálni a típusnév után tett <b>&amp;</b> jellel lehet. Változóból referenciát képezni pedig a változónév elé tett <b>&amp;</b> jellel lehet.</p>
+		<pre><code class="language-cpp">
+		void inc(int& x) {	// Referencia típus átvétele
+			x++; 			// Csak a referencia nevével hivatkozunk függvényen belül
+		}
+		// ...
+		int a = 10;
+		int& b;		// Fordítási hiba - inicializálatlan referencia típus
+		int& c = a; // Működik - mostantól a és c ugyanarra a memóriaterületre mutat
+		inc(c);		// Nincs szükség referencia képzésre
+		</code></pre>
+		
+		<hr>
+		
+		<h5>Inline kód</h5>
+		<p>A C nyelv makrói veszélyesek, mivel nagyon könnyen szemantikai hibát okozhatnak. (Például a rossz zárójelezés, mellékhatások figyelmen kívül hagyása, stb.)</p>
+		<p>Ezt a problémát oldja meg az inline függvények bevezetése, melyek ugyanúgy behelyettesítődnek a kódba mint a makrók, viszont mivel függvények, ezért garantált a paramétrek kiértékelődése az átadás előtt (szekvencia pont)<sup>*</sup>.</p>
+		<p>Inline függvényt a függvény visszatérési típusa elé tett <b>inline</b> kulcsszóval lehet létre hozni.</p>
+		<pre><code class="language-cpp">
+		inline int add(int a, int b) {
+			return a + b;
+		}
+		//...
+		int x = add(6, 4);
+		</code></pre>
+		<small>* - Az inline függvények igazából csak hintek a fordítónak; dönthet úgy a fordító, hogy azokat mégis függvényként kezeli.</small>
+		
+		<h5>Függvénytúlterhelés</h5>
+		<p>A C++-ban ugyanaz a globális függvénynév többször is szerepelhet, ha különbözik a <b>paraméterlistája</b>.</p>
+		<p>Ez akkor hasznos, ha szeretnénk a függvényünket eltérő típusú paraméterekkel használni, de szeretnénk közös névvel hivatkozni rá (generikusan használni őket).</p>
+		<pre><code class="language-cpp">
+		int min(int a, int b);			// "Eredeti" függvény	
+		double min(double a, double b);	// Double túlterhelés
+		char min(char a, char b);		// Char túlterhelés
+		int min(char a, char b);		// Fordítási hiba - Nem elég a visszatérési érték eltérése
+		//...
+		int x = min(5, 4);				// Működik - Az "eredeti" változat hívódik meg
+		double y = min(5, 4);			// Működik - A castolás megtörténik
+		int z = min(5.4, 'a');			// Hiba - Több függvénynek is megfelel a paraméterlista
+		</code></pre>
+		
+		<h5>Alapértelmezett paraméter</h5>
+		<p>A függvényparamétereknek lehet alapértelmezett értéke, amit - ha függvényhíváskor nem volt megadva - behelyettesíti parméter értékeként a fordító.</p>
+		<p>Ilyen paraméterek csak a paraméterlista végén szerepelhetnek.</p>
+		<pre><code class="language-cpp">
+		void printStringMultipleTimes(const char* str, int times = 1);
+		//...
+		printStringMultipleTimes("abc", 5);	// Ilyenkor - mivel meg van adva  - times értéke 5
+		printStringMultipleTimes("def");	// Ilyenkor - mivel nincs megadva - times értéke 1
+		</code></pre>
+	
+		<hr>
+	
+		<h5>Névterek</h5>
+		<p>A névterek változókat és függvényeket tartalmaznak. A névtér úgymond egy "címkét" ragaszt a benne lévő elemekre, ami jelzi, hogy hozzá tartoznak. Éppen ezért a benne tárolt elemekre csak az őt tartalmazó névtér nevével hivatkozhatunk. Ezzel elkerülhető az esetleges névütközés, ugyanis lehet két azonos nevű változó/függvény eltérő névtérben.</p>
+		<p>Névteret a <b>namespace</b> kulcsszóval hozhatunk létre. Névtérbeli elemet a <b>::</b> scope operátorral érhetünk el <b>Névtér::Elem</b> formátumban.
+		<pre><code class="language-cpp">
+		namespace Test {
+			int a, b;
+			char* c;
+			void d(int e, double f); // Névtéren belüli függvény
+		}
+		// ...
+		int d(char g);				 // Névtéren kívüli függvény
+		// ...
+		d('h');						 // A külső függvény hívódik
+		Test::d(4, 7.5);			 // A belső függvény hívódik
+		</code></pre>
+		
+		<h5>Névterek megnyitása</h5>
+		<p>A névterek elemeit akár el is érhetjük a "címkéjük" nélkül, ha azt megengedjük a fordítónak. Ezzel rövidebb, átláthatóbb kódot kapunk, de így fenn áll a veszély, hogy névütközéssel szembesülünk.</p>
+		<p>Névteret megnyitni a <b>using</b> direktívával lehet. Ha utána a <b>namespace</b> kulcsszó és egy névtér neve áll, akkor az egész névteret megnyitjuk. Viszont, ha egy <b>Névtér::Elem</b> alak áll, akkor csak azt a bizonyos elemet nyitjuk meg. A megnyitás mindig a nyitás blokkjában érévényes, tehát ha a fájl elejére írjuk, akkor az egész fájlban megnyitjuk a névteret.</p>
+		<pre><code class="language-cpp">
+		namespace Test {
+			int a, c;
+		}
+		
+		namespace Test2 {
+			int b, d;
+		}
+		// ...
+		using namespace Test; // Az egész Test névtér megnyitása
+		using Test2::b;		  // Csak a Test2 névtér b változójának megnyitása
+		a = 6;	b = 7;		  // A megynitott változók lokális változóként használhatóak
+		Test::a = 8;		  // A megnyitás ellenére a régi alak is használható
+		</code></pre>
+		
+		<h5>Az std névtér</h5>
+		<p>Ebben a névtérben található a C++ Standard Library függvényei, konstansai és egyéb elemei. Többek között a Standard I/O. Ez a névtér több header fájlban van definiálva azért, hogy mindig csak az éppen nekünk kellő könyvtárelemet helyezzük el a programunkban.</p>
+		<small>A Standard Library elemeiről itt találsz referenciát: <a href="http://www.cplusplus.com/reference/" target="_blank">C++ Std Reference</a></small>
+
+		<h5>Standard I/O</h5>
+		<p>A Standard I/O elemeit az <b>iostream</b> nevű fejlécben talható, ahol úgynevezett streamek találhatóak. Ezek közül a legfontosabbak:</p>
+		<p><b>std::cin</b> - Console Input, azaz a billentyűzetről olvasás</p>
+		<p><b>std::cout</b> - Console Output, azaz a képernyőre írás</p>
+		<p><b>std::cerr</b> - Console Error, azaz a hibakimenet</p>
+		<p>Velük a <b>&gt;&gt;</b> és a <b>&lt;&lt;</b> operátorokkal lehet kommunikálni. Az operátor bal oldalán a stream található, jobb oldalán pedig gyakorlatilag bármilyen típusú változó vagy literál. Ezen operátorok egymás után láncolhatók.<sup>*</sup></p>
+		<pre><code class="language-cpp">
+		#include &lt;iostream&gt;
+		//...
+		int a;
+		std::cout &lt;&lt; "Hello World" &lt;&lt; std::endl;		// String literál kiírása, az endl az újsor
+		std::cout &lt;&lt; "3 + 4 =" &lt;&lt; 3 + 4 &lt;&lt; std::endl;	// Szám literál kiírása
+		std::cin  &gt;&gt; a;									// Beolvasás a-ba a billentyűzetről
+		std::cout &lt;&lt; "You typed: " &lt;&lt; a &lt;&lt; std::endl;	// Változó kiírása
+		std::cerr &lt;&lt; "Fatal error" &lt;&lt; std::endl;		// Hiba kiírása
+		</code></pre>
+		<small>* - Mivel a streamek ezen operátorai önmagukkal térnek vissza a meghíváskor</small>
+		
+		<h5>Dinamikus memóriakezelés</h5>
+		<p>A C++-ban biztonságos a dinamikus memória kezelés, mivel nincs szükség a <b>void*</b> típusú pointerek castolására.</p>
+		<p>Ha egy bizonyos típusú változóból a (heap) memóriában a <b>new</b> kulcsszóval foglalhatunk, melyet felszabadítani a <b>delete</b> kulcsszóval kell.</p>
+		<p>Ha egy bizonyos típusú változóból egy tömböt szeretnénk foglalni, akkor a <b>new[ ]</b> kulcsszóval foglalhatunk, melyet felszabadítani a <b>delete[ ]</b> kulcsszóval kell.</p>
+		<pre><code class="language-cpp">
+		// A ListItem egy láncolt listaelem struktúra
+		ListItem* item = new ListItem; // Egy ListItem lefoglalása
+		char* str = new char[50];	   // Egy 50 karakter méretű tömb foglalása 
+		// ...
+		delete item;				   // Egy elem felszabadítása
+		delete[] str;				   // Több elem felszabadítása
+		
+		// Ezek C megfelelői (ezek C++-ban is használhatók std:: jelöléssel):
+		ListItem* item = (ListItem*) malloc(sizeof(ListItem));
+		char* str= (char*) malloc(50 * sizeof(char));
+		// ...
+		free(item);
+		free(str);
+		</code></pre>
+		
+		<h5>Kivételkezelés</h5>
+		<p>A programozás során gyakran van szükség arra, hogy ha valamilyen hiba törénik a programmal azt érzékeli tudjuk és valamit tudjunk kezdeni bekövetkezésük esetén.</p>
+		<p>Ezen témakörrel foglakozik a kivételkezelés. Kivételnek nevezzük, ha valahol egy programrész nem megfelelően fut le és azt jelzi.</p>
+
+		<p>Ilyen kivételeket bármilyen függvény dobhat a <b>throw</b> kulcsszóval, mely után bármilyen literál kerülhet.</p>
+
+		<p>A kivételeket detektálni is tudjuk a programunkkal:</p>
+
+		<ul class="browser-default">
+			<li>A vizsgálandó részt a <b>try</b> kulcsszó utáni blokkba helyezzük el.</li>
+			<li>Az egyes kivételek lekezelését a <b>catch</b> kulcsszó utáni blokkba helyezzük el. A <b>catch</b> után meg kell adnunk, hogy milyen típusú hibát szeretnénk kezelni.</li>
+			<li>Több <b>catch</b> blokk is elhelyezhető egymás után.</li>
+			<li>Ha <b>catch</b> után <b>...</b>-ot teszünk azzal bármilyen hibát elkaphatunk, de így nem tudjuk változóként kezelni.</li>
+		</ul>
+		
+		<small>Léteznek az ún. szabványos kivételek, melyeket az STD függvények képeznek. A szabványos kivételekről itt olvashatsz: <a href="http://www.cplusplus.com/reference/exception/exception/"  target="_blank">CPP exception reference</a><br></small>
+		<small>Az OOP bevezetése után a kivételkezeléssel részletesebben is foglalkozunk a 9. leckében.</small>
+		<pre><code class="language-cpp">
+		double divide(double a, double b) {
+			if(b == 0) throw "Division by zero";
+			return a / b;
+		}
+
+		void quadratic(double a, double b, double c, double& x1, double& x2) {
+			double d = b * b - 4 * a * c;
+
+			if(d < 0)
+				throw "Negative discriminant";
+			else if(d == 0)
+				x1 = x2 = divide((-1 * b), (2 * a));
+			else {
+				x1 = divide((-1 * b + sqrt(d)),  (2 * a));
+				x2 = divide((-1 * b - sqrt(d)),  (2 * a));
+			}
+		}
+		//...
+		double x, y;
+		try {
+			quadratic(1, 2, 1, x, y);	// OK
+			quadratic(0, 1, 1, x, y);	// Hiba - 0-val osztás &rarr; megfelelő catch lefut
+			quadratic(1, 1, 1, x, y);	// Már nem fut le, de Hiba - Negatív diszkrimináns
+			quadratic(1, 3, 1, x, y);	// Már nem fut le, de OK
+		}
+		catch(const char* error) {			// Ha a try blokkban ilyen típusú hiba volt ez fut le
+			std::cerr << error; 			// Írjuk ki a kapott hibát
+		}
+		</code></pre>
+	</body>
+</html>

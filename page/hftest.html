@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8"/>
+		<title>InfoC++2 :: HFTest</title>
+		<script type="text/javascript" src="js/prism.js"></script>
+	</head>
+		
+	<body>
+			<h4>HFTest</h4>
+			<hr>
+
+			<h5>Mi a HFTest?</h5>
+			<p>A HFTest szorgalmi feladatokat értékelő rendszer. Ezen feladatok sikeres megoldásáért EXTRA pontokat lehet szerezni a félév során.</p>
+			<p>A program a BME Ural2 nevű UNIX szerverén fut, ott kell használni távoli eléréssel.</p>
+			
+			<h5>A szorgalmi feladatok megoldásának menete</h5>
+			<p>
+				<ol>
+					<li>Kapcsolódás az Ural2 szerverhez</li>
+					<li>A programkód megírása</li>
+					<li>A programkód lefordítása</li>
+					<li>A program tesztelése</li>
+					<li>HFTest értékelés</li>
+				</ol>
+			</p>
+			<p>A továbbiakban ezeket a pontokat nézzük végig.</p>
+			
+			<h5>Kapcsolódás az Ural2 szerverhez</h5>
+			
+			<p>Először is szükségünk van egy felhasználói fiókra az Ural2 használatához, melyet itt szerezhetünk be: <a href="https://accadmin.hszk.bme.hu/" target="_blank">HSZK Accadmin</a></p>
+			<p><b>Linux</b>: Először is szükségünk van egy SSH kliens programra, például OpenSSH. (Ennek a beszerzése disztribúciónként eltérő.) Azután valamilyen terminálon írjuk be a következőt:</p>
+			<pre><code class="language-bash">
+			ssh ural2.hszk.bme.hu					
+			</code></pre>
+			
+			<p><b>Windows</b>: Egy SSH kliensre lesz szükségünk, a legnépszerűbb a Putty nevű program, amit innen tölthettek le: Putty Download <a href="https://the.earth.li/~sgtatham/putty/latest/w32/putty.exe" target="_blank">32-bit</a>/<a href="https://the.earth.li/~sgtatham/putty/latest/w64/putty.exe" target="_blank">64-bit</a></p>
+			<p>A Host Name felíratú szövegdobozba írjuk be az <b>ural2.hszk.bme.hu</b> címet, a Porthoz a 22-t. A Saved Sessions feliratú szövegdobozba írjunk be egy tetszőleges nevet. Ezután kattintsunk a Save gombra. Ezentúl az általunk megadott nevű listaelemre duplaklikkelve csatlakozhatunk a szerverhez.</p>
+			
+			<hr>
+			
+			<p>Ezek után valami hasonlót kell látnunk:</p>
+			
+			<pre><code class="language-bash">
+			login as: _				
+			</code></pre>
+			
+			<p>Írjuk be az Ural2 azonosítónkat, majd Enter után a jelszavunkat. (A jelszó beírásakor nem látszódik, hogy mit írunk be) <br>
+			Ha sikeresen beléptünk, akkor ilyesmit kell látnunk a képernyőn:
+			</p>
+			<pre><code class="language-bash">
+			Last login: Dátum from IP
+					Sun Microsystems Inc.      SunOS 5.8      Generic May 2001
+			
+							Udvozoljuk a BME Hallgatoi Szamitogepkozpont
+									ural2.hszk.bme.hu szerveren!
+			
+										Sun Enterprise 450
+									4x 400 MHz UltraSparc CPU
+										4 GB RAM,  180 GB HD
+			
+			+--------------------------------------------------------------------+
+			| Temaszammal kapcsolatos problema eseten javasoljuk, hogy eloszor a |
+			| http://www.hszk.bme.hu/mittegyek.html    oldalon   tajekozodjanak. |
+			+--------------------------------------------------------------------+
+			|  Ha a Szabalyzatunkban foglaltakat nem fogadja el, MOST lepjen ki. |
+			+--------------------------------------------------------------------+
+			
+			You don't have mail.
+			
+			ural2:~$ _
+			
+			</code></pre>
+			
+			<p>Ezekután a leírás feltételezi az alapvető UNIX utasítások ismeretét. (Melyeket feltehetőleg az 1. laboron leadtak, továbbá javasoljuk a Midnight Commander használatát az mc paranccsal.) Ezekután a home könyvtár <b>src</b> könyvtárában lesznek a forráskódok és a <b>bin</b> könyvtárba fordítunk.</p>
+			
+			<h5>A programkód megírása</h5>
+			<p>A programkódok megírásához a Midnight Commander szerkesztőjét ajánljuk, ami a következőképpen használható:</p>
+			<pre><code class="language-bash">
+			# mcedit megnyitása - a -c kapcsoló színesen indítja el a szerkesztőt
+			mcedit -c fájlnév
+			# Például
+			mcedit -c ~/src/program.c			
+			</code></pre>
+			
+			<p>A megjelenő szerkesztőbe begépeljük a kódunkat. Gépelés közben a következő gyorsbillentyűk használhatók:</p>
+			
+			<pre><code class="language-bash">
+			F2  - Mentés
+			F7  - Keresés
+			F9  - Menü legörgetése
+			F10 - Kilépés
+			</code></pre>
+			
+			<h5>A programkód fordítása</h5>
+			<p>Fordítani sokféleképpen lehet (kézi begépelés, makefile, IDE stb.), viszont az egyszerű programokat a következő paranccsal lehet fordítani:</p>
+			
+			<pre><code class="language-bash">
+			# Álatlános fordítás - C nyelven - a -o kapcsoló után a lefordult program fájlnevét kell írni
+			gcc -o Kimenet Forráskód1 Foráskód2 ...
+			# Általános fordítás - C++ nyelven
+			g++ -o Kimenet Forráskód1 Foráskód2 ...
+			
+			# Példák
+			gcc -o ~/bin/program1 ~/src/prog1.c
+			gcc -o ~/bin/test ~/src/prog.c ~/src/tester.c
+			g++ -o ~/bin/test ~/src/mycode.cpp ~/src/test.cpp
+			</code></pre>
+			
+			<h5>A program tesztelése</h5>
+			<p>Ha a <b>bin</b> könytárunkat hozzáadtuk a <b>PATH</b> környezeti változóhoz, akkor csak beírjuk a lefordított programunk nevét. Ha nincs, akkor teljes elérési úttal kell beírni a programunk nevét.</p>
+			
+			<h5>HFTest értékelés</h5>
+			<p>Először is készítsünk linket a HFTest programra a <b>bin</b> könyvtárunkban:</p>
+			<pre><code class="language-bash">
+			ln -s ~szebi/hftest ~/bin
+			</code></pre>
+			<p>Ezután a HFTest a következőképpen használható:</p>
+			<pre><code class="language-bash">
+			# HFTest általános használata
+			hftest programnév
+			
+			# Példa
+			hftest ~/bin/feladat1
+			</code></pre>
+			
+			<p>Ezután a HFTest lefuttatja a programunkat, és értékeli azt. Ha sikeres a futás, akkor megkapjuk EXTRA pontjainkat. Ha nem, akkor kiírja a hibát.</p>
+			
+			<h5>A feladatok általánosságban</h5>
+			<p>Mindig a páratlan sorszámú feladatokkal tudjuk lekérdezni a páros sorszámú feladatokat. Tehát az 1. feladat lekérdezi a 2.-at és azután azt megoldjuk.</p>
+			<p>Minden feladat eleje azonos. Előszőr kiírjik a Standard Outputra az azonosítóinkat, és a feladat sorszámát. Majd a páros sorszámúaknál maga a program következik.</p>
+			<p>Az azonosítás valami ilyesmi függvény legyen:</p>
+			<pre><code class="language-cpp">
+			void identify(int task, bool mail)
+			{
+				std::cout &lt;&lt; "NÉV &lt;E-mail&gt; NEPTUN" &lt;&lt; std::endl;
+				std::cout &lt;&lt; "Feladat = " &lt;&lt; task &lt;&lt; std::endl;
+				
+				// Ha szeretnénk e-mailt kapni a feldatról (ennek csak páratlan sorszámúnál van értelme)
+				if(mail)
+					std::cout &lt;&lt; "Mail" &lt;&lt; std::endl;
+			}
+			</code></pre>
+			
+			<p>A main függvényben a feladatok így néz ki (A példában az 1. feladat):</p>
+			
+			<pre><code class="language-cpp">
+			void main()
+			{
+				identify(1, true);
+				
+				// Ha páros sorszámú lenne ide jönne a program.
+				return 0;
+			}
+			</code></pre>
+			
+			<h5>2. feladat</h5>
+			<p>Ebben a feladatban egy polinom helyettesítési értékét kell kiszámítani. Tehát egy olyan függvény megvalósítása, mely bemenetként megkapja az x változó értékét, majd kiszámolja az együtthatók beszorzásával a polinom értékét.</p>
+			<p>A főprogramban azt kell lekezelnünk, hogy a HFTest megsorozza a Sandard Inputot random x változókkal fájlvége jelig és a programunknak ki kell írnia a Standard Outputra a polinom helyettesítési értékét 4 jegy pontossággal<sup>*</sup>.</p>
+			
+			<small>* - <a href="http://www.cplusplus.com/reference/iomanip/setprecision/" target="_blank">CPP STD IO setprecision</a></small>
+			
+			<h5>4. feladat</h5>
+			<p>Ebben a feladatban egy reguláris kifejezést kapunk, ha lekérdezzük a feladatot. A programunknak a feladatban meghatározott darabszámú, a reguláris kifejezésre illeszkedő szöveget kell kiírni a Standard Outputra, valamint szintén meghatározott számú a reguláris kifejezésre nem illeszkedő szöveget.</p>
+			<p>A reguláris kifejezésekhez ajánjuk a következő weblapokat: <a href="https://regexone.com/" target="_blank">RegexOne</a>, <a href="https://regex101.com/" target="_blank">Regex101</a>, <a href="http://fent.github.io/randexp.js/" target="_blank">RandExp.js</a></p>
+			
+			<h5>6. feladat</h5>
+			<p>Ebben a feladatban a 4. feladatban kapott reguláris kifejezésünkkel kell dolgozni. A HFTest megsorozza random szövegekkel a Standard Inputot és nekünk meg kell számlálni a reguláris kifejezésnek megfelelőket és azt is, hogy hány sort küldött. A fájlvégjel beérkezése után nekünk ki kell írni a Standard Outputra oktális számrendszerben<sup>*</sup> a megfelelők / sorok száma értékeket.</p>
+			
+			<small>* - <a href="http://www.cplusplus.com/reference/ios/oct/" target="_blank">CPP STD IO oct</a></small>
