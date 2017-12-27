@@ -6,14 +6,14 @@
 
 		<title>InfoC++2 :: Főoldal</title>
 
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+		<link rel="stylesheet" href="css/materialize.min.css">
 		<link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
 		<link rel="stylesheet" href="css/main.css">
 		<link rel="stylesheet" href="css/prism.css">
  
-		<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-		<script src="https://use.fontawesome.com/d694dee3c4.js"></script>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/materialize.min.js"></script>
+		<script src="js/d694dee3c4.js"></script>
 		<script src="js/loadPage.js"></script>
 		<script src="js/menu.js"></script>
 
@@ -95,9 +95,9 @@
 				var page = sessionStorage.getItem('lastPage');
 				console.log(page)
 				if(page == null)
-					loadPage("TTL")
+					loadPage("TTL", false)
 				else
-					loadPage(page)
+					loadPage(page, false)
 
 			});
 
