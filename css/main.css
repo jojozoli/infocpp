@@ -55,3 +55,8 @@ code, pre {
 blockquote {
 	border-left: 5px solid #4CAF50 !important;
 }
+
+.svg-wrapper object {
+	display: block;
+	margin: auto;
+}

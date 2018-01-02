@@ -8,5 +8,142 @@
 	</head>
 	<body>
 		<h4>3: Osztályok tulajdonságai</h4><hr>
+		Ebben a fejezetben megismerkedünk az osztályok speciális metódusaival és egyéb viselkedéseivel.<br>
+		Egy dinamikus string osztályon mutatjuk be ezen működéseket.<hr>
+
+		<pre><code class="language-cpp">
+		class String {
+			size_t length;
+			char* pointer;
+
+			// A további kódrészletek ide kerülnek
+		};
+		</code></pre>
+
+		<h5>Konstruktor tulajdonságai</h5>
+		<p>A konstruktor a példányok létrehozása során lefutó kódrészlet. Itt szokás inicializálni a változókat, dinamikus memóriát foglalni, fájlokat megnyitni, stb.</p>
+		<blockquote>A konstruktor visszatérés nélküli függvény, neve az osztály neve. <b>Osztálynév(){}</b></blockquote>
+		
+		<h6>Inicializáló lista</h6>
+		<p>Az inicializáló listával könnyen adhatunk értéket az adattagoknak rövid, tömör alakban a konstruktor fejlécében. Továbbá konstans és referencia adattagok inicializálásának elvégzését <b>kötelezően</b> itt kell megtenni.</p>
+		<p>A függvénydefiníció után tett : jel után következik a lista <b>adattag(paraméter)</b> alakban, vesszővel elválasztva. Így a megadott adattagokat beállítjuk a megfelelő paraméterek értékére.</p>
+
+		<blockquote>A <b>String</b> osztálynak legyen egy mérettel megadható és egy <b>const char*</b>-ból létrehozó konstruktora.</blockquote>
+		<pre><code class="language-cpp">
+		String(size_t length = 0) : length(length),		 pointer(new char[length]) { }
+		String(const char* str)   : length(strlen(str)), pointer(new char[length]) { strcpy(pointer, str); }
+		</code></pre>
+
+		<hr><h5>Destruktor tulajdonságai</h5>
+		<p>A destruktor a példányok megsemmisülése során lefutó kódrészlet. Itt szokás a dinamikus memóriát felszabadítani, fájlokat lezárni, egyéb erőforrásokat leszabadítani, stb.</p>
+		<blockquote>A destruktor visszatérés nélküli függvény, neve az osztály neve és előtte egy ~ jel. <b>~Osztálynév(){}</b></blockquote>
+
+		<blockquote>A String osztálynak, mivel fogalt dinamikus memóriát, a destruktorában azt fel kell szabadítania.</blockquote>
+		<pre><code class="language-cpp">
+		~String() { delete[] pointer; }
+		</code></pre>
+
+		<hr><h5>Másoló konstruktor</h5>
+		<p>Másoló konstruktor akkor fut le, amikor létrehozunk egy példányt és paraméterül egy létező példányt kapunk. Ilyenkor annak minden adattagja átmásolódik az újdonsült példányba. Lefut még akkor is, ha valahol paraméterként érték szerint adjuk át az osztályunkat.</p>
+		<p>Amíg nincs dinamikus adatunk, fájlunk, stb. addig megfelel az alapértelmezett másoló konstruktor, mely "bájtról-bájtra" átmásolja a másik példány adattagjait.</p>
+		<p>A probléma ezen esetekben jelentkezik, tekintsük a következő ábrát:</p>
+		<p class="svg-wrapper"><object data='img/copycon.svg' type="image/svg+xml"></object></p>
+		<p>Mint látható, ha másoljuk a String osztály példányait, akkor a benne lévő pointer egy-az-egyben másolódik. Ez akkor lesz súlyos probléma, ha valamelyik példányt megsemmisítjük, és annak destruktora felszabadítja a dinamikus területet. Ekkor a másik példánynak egy illegális pointere marad.</p>
+		<p class="svg-wrapper"><object data='img/copycon2.svg' type="image/svg+xml"></object></p>
+		<p>A megoldás az, hogy felülírjuk az alapértelmezett másoló konstruktort és átmásoljuk az összes adattagot kézzel.</p>
+
+		<blockquote>A másoló konstruktor egy olyan konstruktor mely egy konstans referenciát kap a másolandó példányról. <br><b>Osztálynév(const Osztálynév&amp;){}</b></blockquote>
+
+		<pre><code class="language-cpp">
+		String(const String&amp; other) : length(other.length), pointer(new char[length]) { strcpy(pointer, other.pointer); }
+		</code></pre>
+
+		<h5>Értékadó operátor</h5>
+		<p>Az értékadó operátorra akkor van szükség, ha már létezik egy példányunk és szeretnénk egy másik példány adattagjait átmásolni. Gyakorlatilag töröljük a saját adatainkat, majd átmásoljuk a másik példány adatait.</p>
+
+		<blockquote>Az értékadó operátor az osztály operator= metódusa. <b>Osztálynév&amp; operator=(const Osztálynév&amp;){}</b></blockquote>
+		<p>Első körben nézzünk meg egy kevésbé szerencsés, nem gyakorlatias megoldást:</p>
+		<pre><code class="language-cpp">
+		String&amp; operator= (const String&amp; other) {
+			if(this != &amp;other) {					// Saját magunkat nem szeretnénk törölni majd másolni
+				delete[] pointer;					// Saját pointer felszabadítása
+				length = other.length;
+				pointer = new char [length + 1];
+				strcpy(pointer, other.pointer);		// Másik példány másolása
+			}
+
+			return *this;							// a = b = c típusú láncolhatóság miatt
+		}
+		</code></pre>
+
+		<h6>Copy-and-swap fordulat</h6>
+		<p>A fenti megvalósítás több ponton sem szerencsés:</p>
+		<ul class="browser-default">
+			<li>Gyakorlatilag egymás után tettük a destruktort és a másoló konstruktort &rarr; kódduplikáció</li>
+			<li>Könnyen lemaradhat az önmásolás kiküszöbölése &rarr; memóriakezelési problémák</li>
+			<li><small>Nem kivételbiztos a kód</small></li>
+		</ul>
+
+		<p>Erre biztosít megoldást a copy-and-swap fordulat, mely során implicte meghívjuk a másoló konstruktort és a destruktort.</p>
+		<blockquote>
+			Tekintsük azt a példát, hogy <b>B = A</b><br>
+			<ol>
+				<li>Készítsünk másolatot <b>A</b>-ról &rarr; <b>A'</b></li>
+				<li>Cseréljük ki <b>B</b> és <b>A'</b> adattagjait bájtról bájtra</li>
+				<li>Semmisítsük meg <b>A'</b>-t</li>
+			</ol>
+		</blockquote>
+		<p class="svg-wrapper"><object data='img/copyandswap.svg' type="image/svg+xml"></object></p>
+		<blockquote>A <b>copy-and-swap fordulat</b> végrehajtásához szükség van egy olyan metódusra, mely kicseréli az osztály adattagjait. Ez használja a szabványos <b>std::swap</b> függvényt.<br>
+		Ezekután elegendő az értékadó operátornak csak ezen metódust meghívnia.
+		</blockquote>
+
+		<pre><code class="language-cpp">
+		void swap(const String&amp; other) {
+			std::swap(pointer, other.pointer);
+			std::swap(length,  other.length);
+		}
+
+		String&amp; operator= (String other) {	// 1. Mivel érték szerint adtuk át, ezért másolat készül az other példányról
+			swap(other);					// 2. Kicseréljük a másolattal az adatainkat
+			return *this;					// 3. Itt megsemmisül a másolat, és mivel nála van a régi pointerünk ezért azt fel fogja szabadítani 
+		}
+		</code></pre>
+
+		<hr>
+		<blockquote>A fenti <b>String</b> osztály megtalálható és letölthető a <b>Függelék</b> menüpontban.</blockquote>
+
+		<hr>
+		<h5>Statikusság</h5>
+		<p>Felmerülhet néha az igény példányoktól független, de az osztályhoz kötődő "globális" adattagra vagy metódusra. Erre megoldás a statikus adattag és metódus.</p>
+		<blockquote>Statikus metódus vagy adattagot a neve elé tett <b>static</b> kulcsszóval hozhatunk létre.</blockquote>
+		<small>Gyakorlatilag egy globális változó az osztályon belül.</small>
+
+		<h5>Statikus adattag</h5>
+		<p>Egy osztály statikus adattagját ha módosítjuk valahol, akkor az minden példány számára is megváltozik, mivel az osztály részét képezi.</p>
+		<p>Az értéküket <b>kötelező</b> beállítani a példányosítás előtt!</p>
+
+		<pre><code class="language-cpp">
+		class String {
+			public:
+			static size_t max_size;
+			// ...
+		};
+		// ...
+		size_t String::max_size = 200;
+		</code></pre>
+
+		<h5>Statikus metódusok</h5>
+		<p>A példányoktól független metódus, éppen ezért <b>csak</b> statikus adattagokat ér el!!</p>
+
+		<pre><code class="language-cpp">
+		class String {
+			public:
+			static String fromInt(int x);
+			// ...
+		};
+		// ...
+		String str = String::fromInt(65536);
+		</code></pre>
 	</body>
 </html>

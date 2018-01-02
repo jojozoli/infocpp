@@ -8,5 +8,83 @@
 	</head>
 	<body>
 		<h4>4: Öröklés</h4><hr>
+		<p>Ebben a fejezetben az osztályok egymással való hierarchikus viszonyáról fogunk beszélni, az öröklésről.</p><hr>
+		<h5>Öröklés-elmélet</h5>
+		<blockquote>Biológia tudásunkat megerőltetve kijelenthetjük, hogy léteznek állatok, amik tudnak mozogni, lehetnek lábaik, van súlyuk stb. (&rarr;&nbsp;így&nbsp;objektumként&nbsp;reprezentálahtók).<br>
+			Észrevehető, hogy így elég tág fogalmat defnináltunk érdemes lenne kicsit konkretizálni. <br>
+			Például definiálhatnánk a gerinceseket és a rovarokat, mint állatok. Sőt a gerincesek tovább is bonthatók például hüllőkre és emlősökre. <br><br>
+
+			Látható, hogy az objektumok <b>az-egy</b> (is-a) kapcsolatban állnak. (Az emlős <b>az-egy</b> gerinces, a gerinces <b>az-egy</b> állat, stb.)<br>
+			Továbbá azt is láthatjuk, hogy bizonyos tulajdonságok öröklődnek: például az emlősöknek is van gerince. Vagy éppen "felülíródnak": például egy emlős és egy hüllő nem ugyanúgy szaporodik.
+		</blockquote>
+
+		<blockquote>Egy az-egy kapcsolatban a szülőt <b>alaposztálynak</b>, a gyerekett <b>leszármazott osztálnynak</b> nevezzük, az összes kapcsolat együttes rendszerét <b>hierarchiának</b>.</blockquote>
+
+		<h5>UML osztálydiagram</h5>
+		<p>Az UML (Unified Modeling Language) osztálydiagram egy szabványos jelölést biztosító nyelv, mellyel vizuálisan tudjuk reprezentálni az osztályhierarchiát.</p>
+		<p>Az osztályokat téglalapok, az öröklést teli végű nyilak.</p>
+		<p class="svg-wrapper" style="max-width: 400px; margin: auto;"><object data='img/animals.svg' type="image/svg+xml"></object></p>
+
+		<h5>Öröklési láthatóság</h5>
+		<p>Öröklés során természetesen az objektumok egymással megosztanak adatokat. De az adatok védelme érdekében megtilthatjuk a leszármazott osztálynak, hogy hozzáférjen az alaposztályának adataihoz.</p>
+		<blockquote>A C++-ban 3 féle öröklési módot különböztetünk meg: <b>public, private</b> és <b>protected</b></blockquote>
+
+		<p>A következő táblázat összefoglalja, hogy az egyes öröklési módok során az alaposztály egyes adattagjai milyen módon érhetők el a leszármazott osztályban.</p>
+		<p class="svg-wrapper"><object data='img/inheritance.svg' type="image/svg+xml"></object></p>
+		<h5>Észrevételek</h5>
+		<ul class="browser-default">
+			<li>A private adattagok nem láthatók még a leszármazottak felé sem</li>
+			<li>A protected adattagok csak a leszármazottak felé láthatók, kifelé nem</li>
+			<li>Általánosságban a <b>public</b> öröklésmódot használjuk, így ha nem tesszük ki külön, akkor mindig ezt értjük alatta</li>
+			<li>A konstruktorok, destruktorok, értékadó operátorok nem öröklődnek</li>
+			<li>Ha felülírunk egy alaposztálybeli metódust, akkor a sajátunk hívódik, nem az alaposztályé</li>
+		</ul>
+		<h5>C++ öröklés</h5>
+		<blockquote>Az öröklést a <b>class osztálynév</b> után tett kettőspont után <b>öröklsémód alaposztály</b> formában. Ha nem írunk öröklésmódot, akkor <b>public</b> lesz.<br>
+			class A : public B {};<br>
+			class C : private B {};<br>
+			class D : A {};
+		</blockquote>
+		<pre><code class="language-cpp">
+		class Animal {
+			protected:
+			unsigned int legs;
+			std::string name;
+
+			public:
+			Animal(std::string name, unsigned int legs) : name(name), legs(legs) { }
+			void sound() const { std::cout << "General sound of " << name << std::endl; }
+			int getLegs() const { return legs; }
+		}
+
+		class Cat : Animal {
+			double cuteness;
+			public:
+			Cat(std::string name, double cuteness) : Animal(name, 4), cuteness(cuteness) { }
+			void sound() const { std::cout << name << ": Meow meow" << std::endl; }
+		};
+
+		class Fox : Animal {
+			int foxiness;
+			public:
+			Snake(std::string name, int foxiness) : Animal(name, 4), foxiness(foxiness) { }
+			void sound() const { std::cout << name << ": What does the fox say?" << std::endl; }
+		};
+
+		// ...
+
+		Animal acb("Cannibals", 7);
+		Cat prc("Princess", 0.7), grp("Grumpy", 0);
+		Fox vuk("Vuk", 4), rcp("Recip", 1);
+
+		rcp.legs = 6 // Fordítási idejű hiba -> protected tag nem érhető el kívülről
+		acb.getLegs(); // = 7
+		prc.getLegs(); // = 4
+		vuk.getLegs(); // = 4
+
+		acb.sound(); // = General sound of Cannibals
+		grp.sound(); // = Grumpy: Meow meow
+		vuk.sound(); // = Vuk: What does the fox say?
+		</code></pre>
 	</body>
 </html>
