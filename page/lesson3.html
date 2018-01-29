@@ -75,40 +75,41 @@
 			return *this;							// a = b = c típusú láncolhatóság miatt
 		}
 		</code></pre>
+		<blockquote class="extra">
+			<h6>Copy-and-swap fordulat</h6>
+			<p>A fenti megvalósítás több ponton sem szerencsés:</p>
+			<ul class="browser-default">
+				<li>Gyakorlatilag egymás után tettük a destruktort és a másoló konstruktort &rarr; kódduplikáció</li>
+				<li>Könnyen lemaradhat az önmásolás kiküszöbölése &rarr; memóriakezelési problémák</li>
+				<li><small>Nem kivételbiztos a kód</small></li>
+			</ul>
 
-		<h6>Copy-and-swap fordulat</h6>
-		<p>A fenti megvalósítás több ponton sem szerencsés:</p>
-		<ul class="browser-default">
-			<li>Gyakorlatilag egymás után tettük a destruktort és a másoló konstruktort &rarr; kódduplikáció</li>
-			<li>Könnyen lemaradhat az önmásolás kiküszöbölése &rarr; memóriakezelési problémák</li>
-			<li><small>Nem kivételbiztos a kód</small></li>
-		</ul>
+			<p>Erre biztosít megoldást a copy-and-swap fordulat, mely során implicte meghívjuk a másoló konstruktort és a destruktort.</p>
+			<blockquote>
+				Tekintsük azt a példát, hogy <b>B = A</b><br>
+				<ol>
+					<li>Készítsünk másolatot <b>A</b>-ról &rarr; <b>A'</b></li>
+					<li>Cseréljük ki <b>B</b> és <b>A'</b> adattagjait bájtról bájtra</li>
+					<li>Semmisítsük meg <b>A'</b>-t</li>
+				</ol>
+			</blockquote>
+			<p class="svg-wrapper"><object data='img/copyandswap.svg' type="image/svg+xml"></object></p>
+			<blockquote>A <b>copy-and-swap fordulat</b> végrehajtásához szükség van egy olyan metódusra, mely kicseréli az osztály adattagjait. Ez használja a szabványos <b>std::swap</b> függvényt.<br>
+			Ezekután elegendő az értékadó operátornak csak ezen metódust meghívnia.
+			</blockquote>
 
-		<p>Erre biztosít megoldást a copy-and-swap fordulat, mely során implicte meghívjuk a másoló konstruktort és a destruktort.</p>
-		<blockquote>
-			Tekintsük azt a példát, hogy <b>B = A</b><br>
-			<ol>
-				<li>Készítsünk másolatot <b>A</b>-ról &rarr; <b>A'</b></li>
-				<li>Cseréljük ki <b>B</b> és <b>A'</b> adattagjait bájtról bájtra</li>
-				<li>Semmisítsük meg <b>A'</b>-t</li>
-			</ol>
+			<pre><code class="language-cpp">
+			void swap(const String&amp; other) {
+				std::swap(pointer, other.pointer);
+				std::swap(length,  other.length);
+			}
+
+			String&amp; operator= (String other) {	// 1. Mivel érték szerint adtuk át, ezért másolat készül az other példányról
+				swap(other);					// 2. Kicseréljük a másolattal az adatainkat
+				return *this;					// 3. Itt megsemmisül a másolat, és mivel nála van a régi pointerünk ezért azt fel fogja szabadítani 
+			}
+			</code></pre>
 		</blockquote>
-		<p class="svg-wrapper"><object data='img/copyandswap.svg' type="image/svg+xml"></object></p>
-		<blockquote>A <b>copy-and-swap fordulat</b> végrehajtásához szükség van egy olyan metódusra, mely kicseréli az osztály adattagjait. Ez használja a szabványos <b>std::swap</b> függvényt.<br>
-		Ezekután elegendő az értékadó operátornak csak ezen metódust meghívnia.
-		</blockquote>
-
-		<pre><code class="language-cpp">
-		void swap(const String&amp; other) {
-			std::swap(pointer, other.pointer);
-			std::swap(length,  other.length);
-		}
-
-		String&amp; operator= (String other) {	// 1. Mivel érték szerint adtuk át, ezért másolat készül az other példányról
-			swap(other);					// 2. Kicseréljük a másolattal az adatainkat
-			return *this;					// 3. Itt megsemmisül a másolat, és mivel nála van a régi pointerünk ezért azt fel fogja szabadítani 
-		}
-		</code></pre>
 
 		<hr>
 		<blockquote>A fenti <b>String</b> osztály megtalálható és letölthető a <b>Függelék</b> menüpontban.</blockquote>

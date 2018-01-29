@@ -10,7 +10,7 @@
 		<link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
 		<link rel="stylesheet" href="css/main.css">
 		<link rel="stylesheet" href="css/prism.css">
- 
+
 		<script src="js/jquery.min.js"></script>
 		<script src="js/materialize.min.js"></script>
 		<script src="js/d694dee3c4.js"></script>
@@ -39,7 +39,7 @@
 			<li><a data-page="HFT" onclick="menu(this)">HFTest</a></li>
 			';
 			?>
-		
+
 		<ul id="cppLessons" class="dropdown-content">
 			<?php echo $a; ?>
 		</ul>
@@ -62,7 +62,7 @@
 					</ul>
 					<ul class="side-nav show-on-small" id="cppSideNav">
 						<li><a data-page="INF" onclick="menu(this)" class="cppSideNavItem">Info</a></li>
-											
+
 						<ul class="collapsible collapsible-accordion"> <li> <a class="collapsible-header">Tananyag</a> <div class="collapsible-body"> <ul>
 							<?php echo $a; ?>
 						</ul> </div> </li> </ul>
@@ -79,7 +79,7 @@
 
 		<!-- Content -->
 		<div class="container">
-			
+
 		</div>
 
 		<script type="text/javascript">

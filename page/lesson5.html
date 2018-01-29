@@ -8,5 +8,165 @@
 	</head>
 	<body>
 		<h4>5: Példányok tulajdonságai</h4><hr>
+		Ebben a fejezetben az öröklődésből adódó problémákat elemezzük a példányok szempontjából.
+		<hr>
+
+		<h5>Példányosítás</h5>
+		<p>Példányosításnak nevezzük azt, amikor az osztályunk "tervrajzaiból" létrehozunk egy konkrét entitást.</p>
+		<pre><code class="language-cpp">
+			class A { ... };
+			class B { B(int x){...}; };
+			//...
+			A xyz; 		// xyz egy példánya az A osztálynak
+			B uvw(3);	// uvw pedig B-nek egy példánya, a megfelelő konstruktort hívva
+		</code></pre>
+		<h5>Példányok kompatibilitása</h5>
+		<p>Az OOP egyik nagyszerű találmánya az, hogy mivel a leszármazott osztály tartalmazza az ősosztályát, így a leszármazott bármilyen olyan helyen használható, ahol az őse is.</p>
+		<p>Tehát a hierarchiában lejjebb lévő osztály kompatibilis a felette lévővel.</p>
+		<pre><code class="language-cpp">
+			class A { };
+			class B : public A { };
+			// ...
+			void func(A* xyz) { }
+			// ...
+			A a; B b;
+			func(&amp;a); // Működik, mivel a megfelelő típus
+			func(&amp;b); // Működik, mivel a kért típus leszármazottja (ami kompatibilis vele)
+		</code></pre>
+		<h5>Virtuális metódus</h5>
+		<p>A fenti példából kiindulva, mivel A és B kompatibilisek, ezért amikor b-t átadjuk elvesznek a "B specifikus" metódusai. Erre a problémára ad megoldást a virtuális metódus.</p>
+		<blockquote>A <b>virtuális metódus</b> egy olyan metódus, melyet ha a leszármazott felüldefiniál, akkor a helyettesítés során a leszármazott verziója hajtódik végre.</blockquote>
+		<blockquote>Virtuális metódust a metódus neve elé írt <b>virtual</b> kulcsszóval lehet létrehozni.</blockquote>
+		<pre><code class="language-cpp">
+			class A {
+				public:
+						int funcA() { return 1; }
+				virtual int funcB() { return 2; }
+			};
+
+			class B : public A {
+				public:
+						int funcA() { return 3; }
+						int funcB() { return 4; }
+			};
+			//...
+			void func(A* a) {
+				std::cout << a->funcA() << " - " << a->funcB() << '\n';
+			}
+			//...
+			A a; B b;
+			func(&amp;a); // 1 - 2, mivel nem leszármazottat hívunk a virtuális metódus csak sima metódusként viselkedik
+			func(&amp;b); // 1 - 4, mivel funcA nem virtuális, ezért az A osztálybeli hívódik; ezzel szemben funcB-ből a B-beli fut le
+		</code></pre>
+
+		<h5>Virtuális destruktor</h5>
+		<p>A fent említett probléma miatt, a heleyttesítés során csak az alaposztály destruktora hívódna meg, tehát érdemes minden osztályban virtuális destruktort használni. (A jobb fajta IDE-k alapból virtuális destruktort szúrnak be).</p>
+		<pre><code class="language-cpp">
+		class A {
+			int* a;
+			public:
+					 A() { a = new int[50]; }
+			virtual ~A() { delete[] a; std::cout << "~A\n"; } 
+		};
+
+		class B : public A {
+			int* b;
+			public:
+					 B() { b = new int[70]; }
+			virtual ~B() { delete[] b; std::cout << "~B\n"; } 
+		};
+		//...
+		A* b = new B;
+		delete b; // ~B ~A, mivel az A destruktora virtuális, ezért a helyettesítéskor a B destruktora is lefut.
+		</code></pre>
+		<blockquote><b>Megjegyzés:</b> virtuális konstruktor nem létezik. (Helyette álatalában létrehozunk egy clone() metódust, mely lemásolja az osztályt.)</blockquote>
+		
+		<h5>Interfészek</h5>
+		<p>A kompatibilitás remek lehetőséget biztosít arra, hogy olyan osztályokat hozzunk létre, melyek meghatározhatják, hogy a leszármazottjainak milyen metódusokat kell megvalósítaniuk.</p>
+		<p>Ezt elősegítve vezetjük be a tisztán virtuális metódust.</p>
+		<blockquote><b>Tisztán virtuális metódus:</b> Egy olyan metódus, mely nincs definiálva, ezért azt minden leszármazottjának definiálnia <b>kell</b>.</blockquote>
+		<blockquote><b>Interfész: </b> Egy olyan osztály, melynek csak tisztán virtuális metódusai vannak. Éppen ezért <b>nem példányosítható</b>.</blockquote>
+		<blockquote>Tisztán virtuális metódust a virtuális metódus deklarációja után tett <b>= 0</b> jelzéssel lehet létrehozni</blockquote>
+		<pre><code class="language-cpp">
+			class IShape {
+				protected:
+				size_t width, height;
+
+				public:
+				size_t area() = 0;
+				size_t perimeter() = 0;
+			};
+
+			class Rectangle : public IShape {
+				public:
+				size_t area() { return width * height; }
+				size_t perimeter() { return 2 * (width + height); }
+			};
+			//...
+			IShape sh; 		// Hiba: interfész nem példányosítható
+			Rectangle rt;
+		</code></pre>
+		<hr>
+		<h5>Heterogén kollekció</h5>
+		<p>Ha egy bizonyos műveletet szeretnénk elvégezni valamilyen alaposztállyal és leszármazottaival, akkor érdemes őket valamilyen tárolóban elhelyezni és az adott műveletet a tároló minden elemén elvégezni.</p>
+		<p>Ezt a tárolót nevezik <b>heterogén kollekciónak</b>, ugyanis az csak alaposztálybeli pointereket tartalmaz, melyek a kompatibilitás miatt használhatók leszármazottként is.</p>
+
+		<h6>Implementáció</h6>
+		<p>A heterogén kollekció egy olyan osztály lesz, melyben a kérdéses alaposztály pointeréből álló tömböt tárolunk. Így ennek a tömbnek minden elemén már végrehajthatjuk a műveleteket.</p>
+
+		<h6>A pointerek élettartama</h6>
+		<blockquote><b>"Könyvtár" típus:</b> Amikor a heterogén kollekcióban tárolt pointerek megsemmisülnek a kollekcióval együtt.<br><i>Hivatalosan: kompozíció</i></blockquote>
+		<blockquote><b>"Állatkert" típus:</b> Amikor a heterogén kollekcióban tárolt pointerek <b>nem</b> semmisülnek meg a kollekcióval együtt.<br><i>Hivatalosan: aggregáció</i></blockquote>
+		<p>Ezek a vicces (és nem hivatalos) elnevezések, az élettartamra utalnak, ugyanis ha egy könyvtárat leégetünk, akkor a bent lévő könyvek is leégnek; azonban ha egy állatkertet bezárnak, akkor nem fogják legyilkolni az állatokat.</p>
+
+		<pre><code class="language-cpp">
+		struct Vehicle {
+			virtual int getEmission() = 0;
+			virtual ~Vehicle(){} // Ha szükség lenne destruktorra, akkor az alaposztályban legyen mindig virtuális destruktor
+		};
+
+		struct Car : public Vehicle {
+			int getEmission() { return 3; }
+		};
+
+		struct Bus : public Vehicle {
+			int getEmission() { return 10; }
+		};
+
+		struct EmissionCounter {
+			Vehicle** traffic;	// Fontos: A heterogén kollekcióban csak pointerek vannak tárolva
+			size_t  size, count;
+			
+			EmissionCounter(int size = 100) : size(size), count(0) { traffic = new Vehicle*[size]; }
+			~EmissionCounter() { delete[] traffic; } // Mivel állatkert típusú, ezért a tárolt pointereket nem töröljük
+			
+			void addVehicle(Vehicle* v) { traffic[count++] = v; }
+			
+			int totalEmission() {
+				int total = 0;
+				for(size_t i = 0; i < count; i++)
+					total += traffic[i]->getEmission();
+				return total;
+			}
+		};
+		//...
+		Car* a = new Car, *b = new Car;
+		Bus* c = new Bus, *d = new Bus;
+
+		EmissionCounter ec;
+		ec.addVehicle(a); ec.addVehicle(b); ec.addVehicle(c); ec.addVehicle(d);
+		std::cout << ec.totalEmission() << '\n';
+
+		delete a; delete b; delete c; delete d;  // Mivel állatkert típusú
+		</code></pre>
+		<p class="img-wrapper"><img src="img/emisssion.svg" style="max-width: 600px!important;"></p>
+		<small>A 9. fejezetben látni fogjuk, hogy nincs szükség saját tárolót implementálni, léteznek szabványosak is.</small>
+
+		<h5>Heterogén kollekció és az UML osztálydiagram</h5>
+		<p>Ha egy osztály aggregál, vagy kompozitál egy másik osztályt, akkor jelben a következők a jelölések:</p>
+		<p class="img-wrapper"><img src="img/heter_arrows.svg" style="max-width: 200px;"></p>
+		<p>A rombusz mindig a tartalmazónál van, a nyíl a tartalmazottnál. <br><small>Ezt úgy lehet megjegyezni, hogy a gyémánt mindig a gazdagnál van. (angol: diamond = rombusz)</small></p>
+		<p>Az előző példa UML osztálydiagramja:</p>
+		<p class="img-wrapper"><img src="img/uml_emission.svg"></p>
 	</body>
 </html>

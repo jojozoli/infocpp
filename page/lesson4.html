@@ -23,68 +23,51 @@
 		<h5>UML osztálydiagram</h5>
 		<p>Az UML (Unified Modeling Language) osztálydiagram egy szabványos jelölést biztosító nyelv, mellyel vizuálisan tudjuk reprezentálni az osztályhierarchiát.</p>
 		<p>Az osztályokat téglalapok, az öröklést teli végű nyilak.</p>
-		<p class="svg-wrapper" style="max-width: 400px; margin: auto;"><object data='img/animals.svg' type="image/svg+xml"></object></p>
+		<p class="img-wrapper"><img src='img/animals.svg'></p>
 
 		<h5>Öröklési láthatóság</h5>
 		<p>Öröklés során természetesen az objektumok egymással megosztanak adatokat. De az adatok védelme érdekében megtilthatjuk a leszármazott osztálynak, hogy hozzáférjen az alaposztályának adataihoz.</p>
 		<blockquote>A C++-ban 3 féle öröklési módot különböztetünk meg: <b>public, private</b> és <b>protected</b></blockquote>
 
-		<p>A következő táblázat összefoglalja, hogy az egyes öröklési módok során az alaposztály egyes adattagjai milyen módon érhetők el a leszármazott osztályban.</p>
-		<p class="svg-wrapper"><object data='img/inheritance.svg' type="image/svg+xml"></object></p>
-		<h5>Észrevételek</h5>
-		<ul class="browser-default">
-			<li>A private adattagok nem láthatók még a leszármazottak felé sem</li>
-			<li>A protected adattagok csak a leszármazottak felé láthatók, kifelé nem</li>
-			<li>Általánosságban a <b>public</b> öröklésmódot használjuk, így ha nem tesszük ki külön, akkor mindig ezt értjük alatta</li>
-			<li>A konstruktorok, destruktorok, értékadó operátorok nem öröklődnek</li>
-			<li>Ha felülírunk egy alaposztálybeli metódust, akkor a sajátunk hívódik, nem az alaposztályé</li>
-		</ul>
+		<p>A következő táblázatok összefoglalják, a C++ öröklés láthatósági lehetőségeit.</p>
+		
+		<p class="tbl-wrapper fl-left"><img src='img/inheritance.svg' class="img-tbl"></p>
+		<p class="tbl-wrapper fl-right"><img src='img/access.svg' class="img-tbl"></p>
+
 		<h5>C++ öröklés</h5>
 		<blockquote>Az öröklést a <b>class osztálynév</b> után tett kettőspont után <b>öröklsémód alaposztály</b> formában. Ha nem írunk öröklésmódot, akkor <b>public</b> lesz.<br>
 			class A : public B {};<br>
 			class C : private B {};<br>
 			class D : A {};
 		</blockquote>
+		<p>Örökléskor ha felülírjuk az alaposztály metódusait, akkor a példányokon a saját metódusunk hívódik. Az alaposztály konstruktorát az inicializáló listán kell meghívni, különben az alapértelmezett fut le.</p>
 		<pre><code class="language-cpp">
-		class Animal {
-			protected:
-			unsigned int legs;
-			std::string name;
+			class Polygon {
+				protected:
+				size_t width, height;
 
-			public:
-			Animal(std::string name, unsigned int legs) : name(name), legs(legs) { }
-			void sound() const { std::cout << "General sound of " << name << std::endl; }
-			int getLegs() const { return legs; }
-		}
+				public:
+				Polygon(size_t w = 0, size_t h = 0) : width(w), height(h) { }
+				void resize (size_t w, size_t h) { width  = w; height = h; } 
+			};
 
-		class Cat : Animal {
-			double cuteness;
-			public:
-			Cat(std::string name, double cuteness) : Animal(name, 4), cuteness(cuteness) { }
-			void sound() const { std::cout << name << ": Meow meow" << std::endl; }
-		};
+			class Rectangle: public Polygon {
+				public:
+				size_t area() { return width * height; }
+			};
 
-		class Fox : Animal {
-			int foxiness;
-			public:
-			Snake(std::string name, int foxiness) : Animal(name, 4), foxiness(foxiness) { }
-			void sound() const { std::cout << name << ": What does the fox say?" << std::endl; }
-		};
-
-		// ...
-
-		Animal acb("Cannibals", 7);
-		Cat prc("Princess", 0.7), grp("Grumpy", 0);
-		Fox vuk("Vuk", 4), rcp("Recip", 1);
-
-		rcp.legs = 6 // Fordítási idejű hiba -> protected tag nem érhető el kívülről
-		acb.getLegs(); // = 7
-		prc.getLegs(); // = 4
-		vuk.getLegs(); // = 4
-
-		acb.sound(); // = General sound of Cannibals
-		grp.sound(); // = Grumpy: Meow meow
-		vuk.sound(); // = Vuk: What does the fox say?
+			class Triangle: public Polygon {
+				public:
+				size_t area() { return width * height / 2; }
+			};
+				
+			Rectangle rect;
+			Triangle  trgl;
+			rect.resize(4,5);
+			trgl.resize(4,5);
+			cout << rect.area() << '\n'; // 20
+			cout << trgl.area() << '\n'; // 10
 		</code></pre>
+		<p></p>
 	</body>
 </html>

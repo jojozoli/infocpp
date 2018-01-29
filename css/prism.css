@@ -1,5 +1,5 @@
-/* PrismJS 1.9.0
-http://prismjs.com/download.html?themes=prism-okaidia&languages=clike+c+cpp&plugins=custom-class+remove-initial-line-feed+normalize-whitespace */
+/* PrismJS 1.10.0
+http://prismjs.com/download.html?themes=prism-okaidia&languages=clike+c+bash+cpp&plugins=autolinker+highlight-keywords+remove-initial-line-feed+normalize-whitespace+keep-markup */
 /**
  * okaidia theme for JavaScript, CSS and HTML
  * Loosely based on Monokai textmate theme by http://www.monokai.nl/
@@ -122,3 +122,6 @@ pre[class*="language-"] {
 	cursor: help;
 }
 
+.token a {
+	color: inherit;
+}

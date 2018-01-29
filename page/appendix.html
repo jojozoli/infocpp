@@ -1,1 +1,120 @@
-APX
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8"/>
+		<title>InfoC++2 :: Függelék</title>
+		<script src="js/prism.js"></script>
+	</head>
+
+	<body>
+		<h4>Függelék</h4><hr>
+		<h5>String osztály</h5>
+		<blockquote>A forráskód példaprogrammal letölthető:  <a href="download/string.cpp" download><i class="fa fa-file-code-o" aria-hidden="true"></i> string.cpp</a></blockquote>
+		<pre><code class="language-cpp">
+			class String {
+			size_t length;
+			char* data;
+
+		public:
+			// Konstruktorok és destruktor
+			String(size_t length = 0) 	: length(length),		data(new char[length+1]) { data[length] = '\0'; }
+			String(const char* str)   	: length(strlen(str)), 	data(new char[length+1]) { strcpy(data, str); }
+			String(const String&amp;amp; other) : length(other.length), data(new char[length+1]) { strcpy(data, other.data); }
+			virtual ~String () { delete[] data; }
+
+			// Copy-and-swap
+			void swap(String&amp;amp; other) {
+				std::swap(data, other.data);
+				std::swap(length, other.length);
+			}
+
+			String&amp;amp; operator= (String other) {
+				swap(other);
+				return *this;
+			}
+
+			// Getterek és setterek
+			size_t 		 getLength()   const { return length; }
+			char*  		 getPointer()  const { return data; }
+			const char*  getCPointer() const { return data; }
+
+			// Operátorok
+			// Indexelő
+			char&amp;amp; operator[](size_t index) { return data[index]; }
+			const char&amp;amp; operator[](size_t index) const { return data[index]; }
+			
+			// Castoló
+			operator char*() const { return data; }
+
+			// Összefűző
+			String operator+(const String&amp;amp; other) {
+				String temp(length + other.length);
+				strcpy(temp.data, data);
+				strcat(temp.data, other.data);
+				return temp;
+			}
+
+			// Összehasonlító
+			bool operator==(const String&amp;amp; other) { return (strcmp(data, other.data) == 0); }
+			bool operator!=(const String&amp;amp; other) { return (strcmp(data, other.data) != 0); }
+			bool operator< (const String&amp;amp; other) { return (strcmp(data, other.data) <  0); }
+			bool operator> (const String&amp;amp; other) { return (strcmp(data, other.data) >  0); }
+			bool operator>=(const String&amp;amp; other) { return (strcmp(data, other.data) >= 0); }
+			bool operator<=(const String&amp;amp; other) { return (strcmp(data, other.data) <= 0); }
+
+		};
+		</code></pre><hr>
+
+		<h5>Vector osztály</h5>
+		<blockquote>A forráskód példaprogrammal letölthető:  <a href="download/vector.cpp" download><i class="fa fa-file-code-o" aria-hidden="true"></i> vector.cpp</a></blockquote>
+		<pre><code class="language-cpp">
+		template&lt;class T&gt;
+		class Vector {
+			size_t size;
+			T* array;
+
+		public:
+			// Kostruktorok és destruktor
+			Vector(size_t size = 0, const T&amp; fill = T()) : size(size), array(new T[size]) { std::fill(array, array+size, fill); }
+			Vector(const Vector&amp; other) : size(other.size), array(new T[size]) { std::copy(other.array, other.array+other.size, array); }
+			template&lt;typename It&gt; Vector(It first, It last) : size(std::distance(first, last)), array(new T[size]) { std::copy(first, last, array); }
+			virtual ~Vector() { delete[] array; }
+
+			// Copy-and-swap
+			void swap(Vector&amp; other) { std::swap(array, other.array); std::swap(size, other.size); }
+			Vector&amp; operator=(Vector other) { swap(other); return *this; }
+
+			// Indexelő operátor
+			T&amp; operator[](size_t idx) { return array[idx]; }
+			const T&amp; operator[](size_t idx) const { return array[idx]; }
+			T&amp; at(size_t idx) { if(idx &lt; size) return array[idx]; else throw std::out_of_range(""); }
+
+			// Getter és setter
+			size_t getSize() const { return size; }
+
+			// Iterátor (nem vizsgáló!)
+			class iterator {
+				T* pointer;
+			public:
+				iterator(T* ptr) : pointer(ptr) { }
+				T&amp; operator*() { return *pointer; }
+				iterator operator++() { pointer++; return *this; }
+				iterator operator++(int) { iterator i = *this; pointer++; return i; }
+				bool operator==(const iterator&amp; rhs) { return pointer == rhs.pointer; }
+				bool operator!=(const iterator&amp; rhs) { return pointer != rhs.pointer; }
+			};
+
+			iterator begin() { return iterator(array); }
+			iterator end() { return iterator(array + size); }
+		};
+		</code></pre><hr>
+
+		<h5>STL tárolók</h5>
+		<p>Kétféle tároló létezik: <b>asszociatív</b> és <b>szekvenciális</b>.</p>
+		
+		<h6>Asszociatív tárolók</h6>
+		<p>Az elemeknek nincs meghatározott sorrendje, az elemek a kulcsuk megadásával érhetők el.</p>
+		<p><a href="http://en.cppreference.com/w/cpp/container/set">std::set</a>, <a href="http://en.cppreference.com/w/cpp/container/multiset">std::multiset</a>, <a href="http://en.cppreference.com/w/cpp/container/map">std::map</a>, <a href="http://en.cppreference.com/w/cpp/container/multimap">std::multimap</a></p>
+	</body>
+</html>

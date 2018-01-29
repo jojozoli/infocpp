@@ -8,5 +8,285 @@
 	</head>
 	<body>
 		<h4>8: Többszörös öröklés, szerializáció</h4><hr>
+		Ebben a fejezetben a több alaposztályból való öröklésről és az objektumok perzisztenciájáról lesz szó.
+		<hr>
+
+		<h5>Többszörös öröklés</h5>
+		<p>Többszörös öröklésről akkor beszélünk, amikor egy leszármazott osztálynak több ősosztálya is van. Általában akkor használjuk őket, amikor egy osztálynak többféle objektum visekedésével is kell rendelkeznie.</p>
+		<blockquote>Az öröklésnél az alaposztályokat vesszővel elválasztva soroljuk fel. Minden alaposztálytól egyedi láthatósággal örökölhetünk.</blockquote>
+		
+		<blockquote class="example">
+			<pre><code class="language-cpp">
+			struct A {
+				 A() { std::cout << "CONST A "; }
+				~A() { std::cout << "DESTR A "; }
+			};
+
+			struct B {
+				 B() { std::cout << "CONST B "; }
+				~B() { std::cout << "DESTR B "; }
+			};
+
+			struct C: public B, public A {
+				 C() { std::cout << "CONST C "; }
+				~C() { std::cout << "DESTR C "; }
+			};
+			//...
+			C c;
+			// Output:
+			// CONST B CONST A CONST C DESTC C DESTC A DESTC B
+			</code></pre>
+			<p>Mint látható a konstruktorok az öröklés sorrendjében, míg a destruktorok fordítva futnak le.</p>
+		</blockquote>
+
+		<h5>Diamond problem</h5>
+		<p>A többszörös öröklés során a diamond problem akkor lép fel, ha egy osztály több olyan osztálytól örököl, melyek közös alaposztályból származnak.</p>
+		<p class="img-wrapper"><img src="img/diamond.svg" style="max-width: 300px;"></p>
+
+		<pre><code class="language-cpp">
+		struct Person {
+			std::string name;
+			Person(std::string name = "noname") : name(name) { std::cout << "Person CTR\n"; }
+		};
+
+		struct Teacher : public Person {
+			int ID;
+			Teacher(std::string name, int id) : Person(name), ID(id) { }
+		};
+
+		struct Student : public Person {
+			std::string neptun;
+			Student(std::string name, std::string neptun) :  Person(name), neptun(neptun) { }
+		};
+
+		struct Demonstrator : public Teacher, public Student {
+			Demonstrator(std::string name, std::string neptun, int id) : Teacher(name, id), Student(name, neptun) { }
+		};
+		//...
+		Demonstrator db("Doka Balazs", "ABC123", 35);
+
+		std::cout << db.name << '\n';										// Fordítási hiba: kétértelműség a névben
+		std::cout << db.Teacher::name << '-' << db.Student::name << '\n';	// Explicit név: a kettő akár lehetne más is!
+		</code></pre>
+
+		<p>Mint látható a <b>db</b> példánynak két példányban létezik a <b>Person</b> alaposztálybeli neve: egy a <b>Teacher</b> és egy a <b>Student</b> osztályokból. Ez problémás mivel, nem tudunk a nevére hivatkozni és így a két irányból akár más neve is lehetne.</p>
+
+		<h5>Virtuális öröklés</h5>
+		<p>A diamond problem feloldására találták ki a virtuális öröklés, mely során kijelentjük, hogy ha valaki a virtuális leszármazottakból származik le többszörösen, akkor a virtuális alaposztály csak egy példányban jön létre.</p>
+		<blockquote><b>Virtuális öröklés</b> az öröklés listán az alaposztály láthatósága elé tett <b>virtual</b> kulcsszóval hozható létre.</blockquote>
+		<blockquote>Virtuális öröklés során, ha a virtuális leszármazottak leszármazottjai nem hívják meg explicite a virtuális ősosztály konstruktorát, akkor a default konstruktor fut le.</blockquote>
+		<blockquote class="example">A fenti példában a <b>Student</b> és a <b>Teacher</b> osztály fog virtuálisan örökölni a <b>Person</b> osztályból. Így a <b>Person-ból</b> csak egy példány fog keletkezni.</blockquote>
+		<p class="img-wrapper"><img src="img/virtual.svg" style="max-width: 300px;"></p>
+		<blockquote class="example">
+			<p>Az alábbi kódban látszik a virtuális öröklés lényege. A Demonstrator osztálynak háromfajta megoldását adtuk meg:</p>
+			<ul class="browser-default">
+				<li><b>A:</b> A <b>Teacher</b> és <b>Student</b> osztály konstruktorát ugyanazzal a névvel hívtuk meg &rarr; a név <i>undefined</i></li>
+				<li><b>B:</b> A <b>Teacher</b> és <b>Student</b> osztály konstruktorát különböző a nevekkel hívtuk meg &rarr; a név <i>undefined</i></li>
+				<li><b>C:</b> A <b>Person</b> konstruktorát explicite hívtuk meg, a <b>Teacher</b> és <b>Student</b> osztály konstruktorát üres névvel hívtuk meg &rarr; a név a <b>Person</b> konstrukorában megadott lett</li>
+			</ul>
+			<pre><code class="language-cpp">
+				struct Person {
+					std::string name;
+					Person(std::string name = "undefined") : name(name) { }
+				};
+		
+				struct Teacher : virtual public Person {
+					int ID;
+					Teacher(std::string name, int id) : Person(name), ID(id) { }
+				};
+		
+				struct Student : virtual public Person {
+					std::string neptun;
+					Student(std::string name, std::string neptun) :  Person(name), neptun(neptun) { }
+				};
+		
+				struct DemonstratorA : public Teacher, public Student {
+					DemonstratorA(std::string name, std::string neptun, int id) : Teacher(name, id), Student(name, neptun) { }
+				};
+		
+				struct DemonstratorB : public Teacher, public Student {
+					DemonstratorB(std::string name1, std::string name2, std::string neptun, int id) : Teacher(name1, id), Student(name2, neptun) { }
+				};
+		
+				struct DemonstratorC : public Teacher, public Student {
+					DemonstratorC(std::string name, std::string neptun, int id) : Person(name), Teacher("", id), Student("", neptun) { }
+				};
+				//...
+				DemonstratorA dbA("Doka Balazs", "ABC123", 35);
+				DemonstratorB dbB("Doka Balazs", "Boka Dalazs", "ABC123", 35);
+				DemonstratorC dbC("Doka Balazs", "ABC123", 35);
+		
+				std::cout << dbA.name << '-' << dbB.name << '-' << dbC.name << '\n';
+				// undefined-undefined-Doka Balazs
+			</code></pre>
+		</blockquote>
+		<hr>
+		<h5>Példányok életciklusa</h5>
+		<p>A virtuális öröklés bevezetésével a példánok létrejötté és megszűnésének sorrendje egy non-triviális probléma lett. A sorrend bevezetéséhez szükséges a virtuális tábla fogalma.</p>
+		<blockquote><b>Virtuális tábla:</b> Az osztályokon belül egy olyan "rejtett adattag", mely tartalmazza az összes leszármazott virtuális metódusainak pointereit valamint a virtuális alaposztályra mutató pointereket is. (További információ: <a href="https://en.wikipedia.org/wiki/Virtual_method_table">Wikipedia</a>)</blockquote>
+		<table class="obj-wrapper bordered">
+			<tr><th>#</th><th>Folyamat</th><th>Példa</th></tr>
+			<tr><td><b>1.</b></td><td>Virtuális alaposztályok konstruktorai</td><td>Person</td></tr>
+			<tr><td><b>2.</b></td><td>A többi alaposztály konstruktorai a hierarchián felfelé</td><td>Teacher, Student</td></tr>
+			<tr><td><b>3.</b></td><td>A virtuális alaposztályok beírása a virtuális táblába</td><td>Person &rarr; Teacher::VTable, Student::VTable</td></tr>
+			<tr><td><b>4.</b></td><td>A virtuális metódusok beírása a virtuális táblába</td><td>-</td></tr>
+			<tr><td><b>5.</b></td><td>Belső osztályok konstruktorának meghívása</td><td>-</td></tr>
+			<tr><td><b>6.</b></td><td>Saját konstruktor hívása</td><td>Demonstrator</td></tr>
+		</table>
+		<p class="img-wrapper"><img src="img/virtual.gif"></p>
+		<p>Az objektum megszűnése a táblázatban lentről felfele történik a konstruktor=destruktor, beírás=törlés helyettesítésekkel.</p>
+
+		<hr>
+		<h5>Típuskonverzió</h5>
+		<p>A heterogén kollekciónál megismertük, hogy a példányok pointerei milyen módon kompatibilisek. Az virtuális öröklések bevezetésével most lehetőség nyílik a pointerek egymásba való alakítására. Ez a folyamat a típuskonverzió.</p>
+		<p>A C nyelvből megismert explicit castolást főleg alapvető típusoknál (fundamental data types) alkalmazzuk, ugyanis nem mindig biztosít védelmet a konverzió sikerességét tekintve.</p>
+		<p>Ezért C++-ban bevezettek 4 féle konverziós operátort.</p>
+		<blockquote><b>Típuskonverzió (cast):</b> Egy pointer<sup>*</sup> átalakítása egy másik pointerré.</blockquote>
+		<blockquote>
+			<b>Upcast:</b> Amikor leszármazott típusról konvertálunk alaposztályra. <br>
+			<b>Downcast:</b> Amikor alaposztálybeli típusról konvertálunk leszármazottra. (Általában akkor használjuk, ha biztosan tudjuk, hogy a cél az leszármazottja a forrásnak. pl. Heterogén kollekció)
+		</blockquote>
+
+		<small>* - Ritkábban szokás referenciákat is konvertálni.</small>
+
+		<hr><h5>dynamic_cast</h5>
+		<p>A pointerek kompatibilitását fordítási és futásidőben is ellenőrzi, értve ezalatt azt, hogy a konvertálandó pointer teljes és érvényes a céltípussal szemben.</p>
+		<blockquote><pre><code class="language-cpp">
+		Forrás* forrás;
+		Cél* c = dynamic_cast&lt;Cél*&gt;(forrás);
+		</code></pre></blockquote>
+		<p><b>Upcast:</b> Ha kompatibilisek, akkor minden akadály nélkül.</p>
+		<p><b>Downcast:</b> Csak akkor lehetséges ha a forrás osztály <b><big>polimorf</big></b> (van virtuális metódusa), ugyanis csak ebben az esetben lehetséges a futásidejű ellenőrzés.</p>
+		<blockquote class="example"><b>Tipp:</b> Használjunk  virtuális destruktort mindenhol, így mindig polimorf lesz az osztályunk.</blockquote>
+		<pre><code class="language-cpp">
+		class Base { virtual ~Base() {} };
+		class Derived : public Base { };
+		//...
+		Base* base = new Base;
+		Base* mixed = new Derived;
+
+		Derived* d1 = dynamic_cast&lt;Derived*&gt;(base);	// Hiba: nem teljes az osztály
+		Derived* d2 = dynamic_cast&lt;Derived*&gt;(mixed);	// Sikeres, mivel teljes és érvényes
+		</code></pre>
+
+		<hr><h5>static_cast</h5>
+		<p>A pointerek kompatibilitását csak fordításidőben ellenőrzi, vagyis csak az érvényességüket a teljességüket nem (azt a programozóra bízza). </p>
+		<blockquote><pre><code class="language-cpp">
+		Forrás* forrás;
+		Cél* c = static_cast&lt;Cél*&gt;(forrás);
+		</code></pre></blockquote>
+		<pre><code class="language-cpp">
+		class Base { virtual ~Base() {} };
+		class Derived : public Base { };
+		//...
+		Base* base = new Base;
+		Base* mixed = new Derived;
+
+		Derived* d1 = dynamic_cast&lt;Derived*&gt;(base);	 // Sikeres, mivel nincs a teljesség ellenőrizve (d1 dereferálása futásidejű hibát okozhat!!!)
+		Derived* d2 = dynamic_cast&lt;Derived*&gt;(mixed); // Sikeres, mivel teljes és érvényes
+		</code></pre>
+
+		<hr><h5>const_cast</h5>
+		<p>Pointerek konstansságát tudja elvenni / hozzárendelni. Az eredetileg konstans változók továbbra sem lesznek módosíthatók!</p>
+
+		<blockquote><pre><code class="language-cpp">
+		A* forrás; const A* cforrás;
+
+		A* c  		= const_cast&lt;A*&gt;	  (cforrás);
+		const A* cc = const_cast&lt;const A*&gt;(forrás);
+		</code></pre></blockquote>
+
+		<pre><code class="language-cpp">
+		// Konstansság hozzáadása
+		int i = 5;
+		const int* j = const_cast&lt;const int*&gt; (&amp;i);
+		*j = 6; // Fordítási hiba: nem módosítható típus módosítási kísérlete
+
+		// Konstansság elvétele
+		const char* c = "nibba";
+		char* d = const_cast&lt;char*&gt;(c);
+		d[2] = 'g'; // Futásidejű hiba: nem módosítható típus módosítási kísérlete
+		</code></pre>
+
+		<hr><h5>&#x1F51E; reinterpret_cast &#x1F51E;</h5>
+		<p>Két tetszőleges pointer egymásba alakítása. Nagyon körültekintően szabad csak használni! Könnyen lehet futásidejű hibát okozni.</p>
+		<blockquote><pre><code class="language-cpp">
+		A* a;
+		B* b = reinterpret_cast&lt;A*&gt;(a);
+		</code></pre></blockquote>
+		<hr><h5>Végszó</h5>	
+		<p>A típuskonverziós operátorok minidig <b>nullptr</b>-el térnek vissza, ha sikertelen volt a konverzió.</p>
+		<hr>
+
+		<h5>Szerializáció</h5>
+		<p>A szerializáció során az objektumainkat olyan szöveges formára hozzuk, mely lementhető (fájlba, memóriába), elküldhető (interneten) vagy melyből később visszaállítható az objektum.</p>
+		<p>A C++ nyelv nem biztosít a fejlesztőknek reflexiót, azaz nincsenek tárolva az objektumokról az adattagjaik és metódusaik nevei. Éppen ezért a szerializációt nagyon nehéz implementálni C++-ban.</p>
+		<p>Az előadáson bemutatott módszer az volt, hogy létrehozunk egy <b>Serializable</b> interfészt és egy perzisztens osztályt, mely többszörösen örököl a Serializable-ből és a szerializálandó osztályból. Továbbá a szerializálást tetszőleges streamre oldja meg.</p>
+		<pre><code class="language-cpp">
+		struct ISerializable {
+			virtual void serialize   (std::ostream&amp; os) = 0;
+			virtual void deserialize (std::istream&amp; is) = 0;
+			virtual ~ISerializable() { }
+		};
+
+		class Person {
+			protected:
+			std::string name;
+			int age;
+
+			public:
+			Person(std::string name, int age) : name(name), age(age) { }
+			std::string getName() const { return name; }
+			int getAge() const { return age; }
+		};
+
+		struct pPerson : public ISerializable, public Person {
+			pPerson(Person&amp; per) : Person(per) { }
+
+			void serialize(std::ostream&amp; os) {
+				os << age << '|' << name.length() << '|' << name;
+			}
+
+			void deserialize(std::istream&amp; is) {
+				(is >> age).ignore(1);
+				
+				size_t namelen;
+				(is >> namelen).ignore(1);
+
+				std::string str(namelen, '\0');
+				is.read(&amp;str[0], namelen);
+				name = str;
+			}
+		};
+		//...
+		Person p("Doka Balazs", 20);
+		pPerson sp(p);
+
+		sp.serialize(std::cout);
+		//... (program betöltésnél, hálózati küldésnél a vétel oldal, stb.
+		sp.deserialize(std::cin);
+		std::cout << sp.getName() << " is " << sp.getAge() << " years old.\n";
+		</code></pre>
+
+		<p>Az előadáson csak felületesen érintettétek a témát, de sok lehetőség van a szerializációval kapcsolatban.</p>
+		<blockquote class="extra">
+			<p>Vizsgáluzk meg a pointer adattagok szerializációját, ugyanis azokat nem érdemes szerializálni mivel a memóriacím mindig változik, így valamilyen rekurzív módszerre van szükség, hogy a pointer által mutatott objektum is kiszerializálódjon.</p>
+			<p>Ezzel egy gráfelméleti problémához jutunk, ugyanis a pointerek szerializációjából lehetséges felállítani egy irányított <b>szerializációs gráfot</b>. A csúcsok az objektumok, az A&rarr;B akkor él ha A-ban van pointer B-re.</p>
+			<p>Alapvetően három fajája létezik:</p>
+			<table>
+				<tr><td><p class="img-wrapper"><img src="img/seri-tree.svg"><br>1. Fa (erdő)</p></td>
+					<td><p class="img-wrapper"><img src="img/seri-dag.svg"><br>2. DAG</p></td>
+					<td><p class="img-wrapper"><img src="img/seri-general.svg"><br>3. Egyéb</p></td></tr>
+			</table>
+
+			<p>Ezen gráfok szerializációs sorrendje/módja:</p>
+			<ol>
+				<li>A fát a gyökértől indulva szerializálhatjuk.</li>
+				<li>A DAG-nak egy topologikus sorrendjében lehet szerializálni.</li>
+				<li>Valahonnan elkezdjük bejárni és egy listában tároljuk, hogy mit szerializáltunk már, és ha valamit szerializáltunk, azt mégegyszer már nem kell.</li>
+			</ol>
+
+			<p>Ennek továbbgondolását és implementálását a kedves olvasóra bízzuk.</p>
+		</blockquote>
 	</body>
 </html>
