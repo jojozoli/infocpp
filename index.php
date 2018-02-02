@@ -35,6 +35,7 @@
 			<li><a data-page="LS9" onclick="menu(this)">9: Kivételkezelés, az STL elemei</a></li>
 			';
 			$b = '<li><a data-page="APX" onclick="menu(this)">Függelék</a></li>
+			<li><a data-page="TSK" onclick="menu(this)">Példatár</a></li>
 			<li><a data-page="EXT" onclick="menu(this)">Érdekességek</a></li>
 			<li><a data-page="HFT" onclick="menu(this)">HFTest</a></li>
 			';

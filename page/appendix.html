@@ -115,6 +115,262 @@
 		
 		<h6>Asszociatív tárolók</h6>
 		<p>Az elemeknek nincs meghatározott sorrendje, az elemek a kulcsuk megadásával érhetők el.</p>
-		<p><a href="http://en.cppreference.com/w/cpp/container/set">std::set</a>, <a href="http://en.cppreference.com/w/cpp/container/multiset">std::multiset</a>, <a href="http://en.cppreference.com/w/cpp/container/map">std::map</a>, <a href="http://en.cppreference.com/w/cpp/container/multimap">std::multimap</a></p>
+		<p>Asszociatív tárolók: <a href="http://en.cppreference.com/w/cpp/container/set">std::set</a>, <a href="http://en.cppreference.com/w/cpp/container/multiset">std::multiset</a>, <a href="http://en.cppreference.com/w/cpp/container/map">std::map</a>, <a href="http://en.cppreference.com/w/cpp/container/multimap">std::multimap</a></p>
+
+		<h6>Szekvenciális tárolók</h6>
+		<p>Az elemeknek van egy meghatározott sorrendje, melyben el lehet érni őket.</p>
+		<p>Szekvenciális tárolók: <a href="http://en.cppreference.com/w/cpp/container/list">std::list</a>, <a href="http://en.cppreference.com/w/cpp/container/vector">std::vector</a>, <a href="http://en.cppreference.com/w/cpp/container/deque">std::deque</a>, <a href="http://en.cppreference.com/w/cpp/container/queue">std::queue</a>, <a href="http://en.cppreference.com/w/cpp/container/stack">std::stack</a>, <a href="http://en.cppreference.com/w/cpp/container/priority_queue">std::priority_queue</a></p>
+
+		<hr><h5>Jelölések a leírásban</h5>
+		<p><pre><code class="language-cpp">
+		template&lt;K, C, A&gt; class asc; 	// Tetszőleges asszociatív tároló
+		template&lt;T, A&gt; 	  class seq;	// Tetszőleges szekvenciális tároló
+		 				  class ctn;	// Tetszőleges tároló (vagy asszociatív vagy szekvenciális)
+		</code></pre></p>
+		<ul class="browser-default">
+			<li><b>K: </b> A kulcs típusa</li>
+			<li><b>C: </b> Az kulcsokat komparáló függvény. (Alapból az <a href="http://en.cppreference.com/w/cpp/utility/functional/less">std::less</a> osztály)</li>
+			<li><b>T: </b> Az elemek típusa.</li>
+			<li><b>A: </b> Allokátor függvény (általában nem foglakozunk vele)</li>
+			<li><b>It:</b> A tárolónak megfelelő iterátor</li>
+		</ul><hr>
+
+		<h5>Közös metódusok</h5>
+		<h6>Konstruktor és destruktor</h6>
+		<pre><code class="language-cpp">
+		seq::seq(const A&amp; alloc = A());												// 1.
+		seq::seq(size_t n, const T&amp; fill = T(), const A&amp; alloc = A()); 				// 2.
+		seq::seq(It first, It last, const A&amp; alloc = A());							// 3.
+
+		asc::asc(const C&amp; comp = C(), const A&amp; alloc = A());						// 1.
+		asc::asc(It first, It last, const C&amp; comp = C(), const A&amp; alloc = A());		// 3.
+
+		cnt::cnt(const cnt&amp; other);													// 4.
+		cnt::~cnt();																// 5.
+		</code></pre>
+
+		<ol>
+			<li>Az A és C paraméterek beállítása és alapértelmezett konstruktor</li>
+			<li>A tároló feltöltése <b>n</b> darab elemmmel, melyek értéke <b>fill</b></li>
+			<li>Iterátoros másoló konstruktor</li>
+			<li>Másoló konstruktor</li>
+			<li>Destruktor</li>
+		</ol>
+		
+		<hr><h6>Iterátorok</h6>
+		<pre><code class="language-cpp">
+		It cnt::begin();	// 1. 
+		It cnt::end();		// 2.
+		It cnt::rbegin();	// 3.
+		It cnt::rend();		// 4.
+		</code></pre>
+		<ol>
+			<li> Az első elem iterátora</li>
+			<li> Az utolsó utáni elem iterátora</li>
+			<li> Az első elem iterátora hátulról</li>
+			<li> Az utolsó utáni elem iterátora hátulról</li>
+		</ol>
+
+		<hr><h6>Méretek</h6>
+		<pre><code class="language-cpp">
+		size_t cnt::size();		// 1. 
+		size_t cnt::capacity();	// 2.
+		size_t cnt::max_size();	// 3.
+		</code></pre>
+		<ol>
+			<li> A tárolóban lévő elemek számával tér vissza </li>
+			<li> A tároló memóriában lefoglalt méretével tér vissza, elemszámban kifejezve </li>
+			<li> A tároló elméleti maximális kapacitásával tér vissza (ez csak egy becslés, már korábban is kicrashelhet a program) </li>
+		</ol>
+
+		<hr><h6>Módosítás</h6>
+		<pre><code class="language-cpp">
+		void				cnt::clear()								//  1.
+		void				cnt::swap(const cnt&amp; other)					//  2.
+		It					cnt::erase(It pos)							//  3.
+		It					cnt::erase(It first, It last)				//  4.
+		
+		It 					seq::insert(It pos, const T&amp; val)			//  5.
+		void				seq::insert(It pos, size_t n, const T&amp; val)	//  6.
+		void				seq::insert(It pos, It first, It last)		//  7.
+		
+		std::pair&lt;It,bool>  asc::insert(const T&amp; val)					//  8.
+		It 					asc::insert(It pos, const T&amp; val)			//  9.
+		void	 			acs::insert(It first, It last)				// 10.
+		
+		</code></pre>
+		<p>
+		<ol>
+			<li>Törli a tároló összes elemét így a mérete 0 lesz</li>
+			<li>Kicseréli az <b>other</b> tároló elemeit a saját elemeivel (lásd copy-and-swap)</li>
+			<li>Törli <b>pos</b> iterátor helyén az elemet és visszatér a törlés helye utáni elem iterátorával</li>
+			<li>Törli a [<b>first</b>,<b>last</b>) iterátorok között az elemeket és visszatér a törlés helye utáni elem iterátorával</li>
+			<li>Beszúr a <b>pos</b> iterátor helyére egy <b>val</b> értékű elemet, növeli a tároló méretét, visszatér az újonan beszúrt elem iterátorával</li>
+			<li>Beszúr a <b>pos</b> iterátor helyére <b>n</b> darab <b>val</b> értékű elemet, növeli a tároló méretét</li>
+			<li>Beszúrja és átmásolja a <b>pos</b> iterátor helyére egy másik tároló [<b>first</b>,<b>last</b>) iterátorhalmazáról az elemeket</li>
+			<li>Beszúr egy <b>val</b> értékű elemet a tárolóba, visszatér egy párral, amiben a <i>first</i> a beszúrt elem iterátora, a <i>second</i> a beszúrás sikeressége</li>
+			<li>Ugyanaz, mint a 8. pont, de a <b>pos</b> iterátorral adhatunk egy tippet, hogy hova kell beszúrni az elemet (de nem feltétlenül kerül oda, mivel nincs sorrend)</li>
+			<li>Beszúrja egy másik tároló [<b>first</b>,<b>last</b>) iterátorai közötti2 elemeket</li>
+		</ol>
+		</p>
+
+		<hr><h5>Szekvenciális tárolók</h5>
+		<h6>Közös metódusok</h6>
+		<pre><code class="language-cpp">
+		void seq::push_front(const T&amp; val)	// 1.
+		void seq::push_back(const T&amp; val)	// 2.
+		void seq::pop_front()				// 3.
+		void seq::pop_back()				// 4.
+		T&amp;   seq::front()					// 5.
+		T&amp;   seq::back()					// 6.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Beszúr egy val értékű elemet a tároló elejére
+			<li> Beszúr egy val értékű elemet a tároló végére
+			<li> Törli az első elemet
+			<li> Törli az utolsó elemet
+			<li> Visszatér az első elem értékével
+			<li> Visszatér az utolsó elem értékével
+		</ol>
+		</p>
+
+		
+		<hr><h6>std::list</h6>
+		<div class="center"><img src="img/STL/list.svg" style="max-width: 400px;"></div>
+		<p>Az <b>std::list</b> egy duplán láncolt lista, melyben csak a lista bejárásával érhetők el az elemek, direkt indexeléssel nem.</p>
+		
+		<b>Listaműveletek</b><br>
+		<pre><code class="language-cpp">
+		void list::remove(const T&amp; val)	// 1.
+		void list::remove_if&lt;P&gt;(P pred)	// 2.
+		void list::reverse()			// 3.
+		void list::unique()				// 4.
+		void list::unique&lt;P&gt;(P pred)	// 5.
+		void list::sort()				// 6.
+		void list::sort&lt;C&gt;(C comp)		// 7.
+		</code></pre>
+		<p>
+		<ol>
+			<li>Törli az összes olyan elemet, melynek értéke <b>val</b></li>
+			<li>Törli az összes olyan elemet, melyre a predikátum igazzal tér vissza (A predikátum: <b>bool pred(T val)</b> alakú)</li>
+			<li>Megfordítja az elemek sorrendjét</li>
+			<li>Törli az összes <b>egymás után következő</b> ugyanolyan értékű elemeket (pl. 1,2,2,2,3,2,4,1 -> 1,2,3,2,4,1)</li>
+			<li>Törli az összes <b>egymás után következő</b> elemeket, melyre a predikátum igaz ( Predikátum: <b>bool pred(const T&amp; a, const T&amp; b)</b> )</li>
+			<li>Rendezi a tömb elemeit növekvő sorrendben (az operator&lt;-t használja)</li>
+			<li>Rendezi a tömb elemeit megadott összehasonlító függvénnyel (A függvény: <b>bool comp(const T&amp; a, const T&amp; b)</b> )</li>
+		</ol>
+		</p>
+		<hr><h6>std::vector</h6>
+		<div class="center"><img src="img/STL/vector.svg" style="max-width: 400px;"></div>
+		<p>Az <b>std::vector</b> egy olyan adatszerkezet, melynek csak a végére lehet beszúrni, és kivenni elemet. Továbbá indexelhető, így használható RandomAccessIterator-al.</p>
+		<p>Tehát nem létezik <b>push_front()</b> és <b>pop_front()</b> metódusa.</p>
+		
+		<b>Indexelés</b>
+		<pre><code class="language-cpp">
+		T&amp; vector::operator[](size_t index)	// 1.
+		T&amp; vector::at(size_t index)			// 2.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Visszaadja az <b>index</b> helyen lévő elem értékét
+			<li> Visszaadja az <b>index</b> helyen lévő elem értékét vizsgálva <b>index</b> helyességét
+		</ol>
+		</p>
+		<hr>
+		
+		<h6>std::deque</h6>
+		<div class="center"><img src="img/STL/deque.svg" style="max-width: 400px;"></div>
+		<p>Az <b>std::deque</b> egy olyan adatszerkezet, melynek mindkét végére lehet beszúrni, és kivenni elemet. Továbbá indexelhető. (A kiejtése kétféleképpen is elfogadott: franciásan /dek/ vagy angolosan /dikjú/)</p>
+		
+		<b>Indexelés</b>
+		<pre><code class="language-cpp">
+		T&amp; deque::operator[](size_t index)	// 1.
+		T&amp; deque::at(size_t index)			// 2.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Visszaadja az <b>index</b> helyen lévő elem értékét
+			<li> Visszaadja az <b>index</b> helyen lévő elem értékét vizsgálva <b>index</b> helyességét
+		</ol>
+		
+		<hr><h6>std::stack</h6>
+		<div class="center"><img src="img/STL/stack.svg" style="max-width: 400px;"></div>
+		<p>Az <b>std::stack</b> egy olyan LIFO adatszerkezet, melynek a tetejére lehet beszúrni elemet és onnan lehet törölni is.</p>
+		<b>Veremműveletek</b>
+		<pre><code class="language-cpp">
+		void stack::push(const T&amp; val)	// 1.
+		void stack::pop()				// 2.
+		T&amp; 	 stack::top()				// 3.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Beszúrja a <b>val</b> értékű elemet a tároló tetejére
+			<li> Törli az elemet a tároló tetejéről
+			<li> Visszatér a legfelső elem értékével
+		</ol>
+		
+		<hr><h6>std::queue</h6>
+		<div class="center"><img src="img/STL/queue.svg" style="max-width: 400px;"></div>
+		<p>Az std::queue egy olyan FIFO adatszerkezet, melynek a tetejére lehet beszúrni elemet és az aljáról lehet törölni.</p>
+		<b>Sorműveletek</b>
+		<pre><code class="language-cpp">
+		void queue::push(const T&amp; val)	// 1.
+		void queue::pop()				// 2.
+		T&amp; 	 queue::front()				// 3.
+		T&amp; 	 queue::back()				// 4.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Beszúrja a <b>val</b> értékű elemet a tároló tetejére
+			<li> Törli az elemet a tároló aljáról
+			<li> Visszatér a legfelső elem értékével
+			<li> Visszatér a legalsó elem értékével
+		</ol>
+		<hr>
+		
+		<h6>std::priority_queue</h6>
+		<div class="center"><img src="img/STL/priority.svg" style="max-width: 400px;"></div>
+		<p>Az std::priority_queue egy olyan FIFO, melybe a beszúráskor egy megadott függvénnyel dől el a beszúrandó elem helye.</p>
+		<b>Sorműveletek</b>
+		<pre><code class="language-cpp">
+		void priority_queue::push(const T&amp; val)				// 1.
+		void priority_queue::pop()							// 2.
+		T&amp; 	 priority_queue::top()							// 3.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Beszúrja a <b>val</b> értékű elemet a függvény szerinti helyre
+			<li> Törli az elemet a tároló aljáról
+			<li> Visszatér a legfelső elem értékével
+		</ol>
+
+
+
+		<hr><h5>Asszociatív tárolók</h5>
+		<h6>Közös metódusok</h6>
+		<pre><code class="language-cpp">
+		size_t asc::count(const T&amp; val)		// 1.
+		It 	   asc::find(const T&amp; what)		// 2.
+		</code></pre>
+		<p>
+		<ol>
+			<li> Mágszámlálja, hogy hány <b>val</b> értékű elem található a tárolóban (ha semmennyi akkor 0)
+			<li> Megkeresi a <b>what</b> értéket a tárolóban és visszatér a rá mutató iterátorral (ha nincs találat akkor <b>asc::end()</b> a visszatérési érték)
+		</ol>
+		</p>
+
+		<hr><h6>std::set és std::multiset</h6>
+		<p>Az <b>std::set</b> egy halmaz jellegű tároló, így minden elem egyszer szerepelhet és az elemeknek nincs sorrendje. Az <b>std::multiset</b>-ben többször is szerepelhetnek elemek.</p>
+		<p class="tbl-wrapper fl-left"><img src="img/STL/set.svg" style="max-width: 200px;"><br>std::set</p>
+		<p class="tbl-wrapper fl-right"><img src="img/STL/multiset.svg" style="max-width: 200px;"><br>std::multiset</p>
+		<p></p>
+
+		<hr><h6>std::map</h6>
+		<p>az <b>std::map</b> egy olyan <b>std::set</b>, mely <b>std::pair</b>-eket tárol. Így gyakorlatilag kulcs-érték párokat tárolunk el. Egy kulcsnak egyedinek kell lennie.</p>
+		<p class="tbl-wrapper fl-left"><img src="img/STL/map.svg" style="max-width: 200px;"><br>std::map</p>
+		<p class="tbl-wrapper fl-right"><img src="img/STL/multimap.svg"  style="max-width: 200px;"><br>std::multimap</p>
+		<p>a</p>
+		<blockquote>Az std::map konstruktorában meg kell adni a kulcs és az érték típusát sablonparaméterként.</blockquote>
 	</body>
 </html>

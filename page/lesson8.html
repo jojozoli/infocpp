@@ -123,7 +123,7 @@
 		<hr>
 		<h5>Példányok életciklusa</h5>
 		<p>A virtuális öröklés bevezetésével a példánok létrejötté és megszűnésének sorrendje egy non-triviális probléma lett. A sorrend bevezetéséhez szükséges a virtuális tábla fogalma.</p>
-		<blockquote><b>Virtuális tábla:</b> Az osztályokon belül egy olyan "rejtett adattag", mely tartalmazza az összes leszármazott virtuális metódusainak pointereit valamint a virtuális alaposztályra mutató pointereket is. (További információ: <a href="https://en.wikipedia.org/wiki/Virtual_method_table">Wikipedia</a>)</blockquote>
+		<blockquote><b>Virtuális tábla:</b> Az példányokon belül egy olyan "rejtett adattag", mely tartalmazza az összes leszármazott virtuális metódusainak pointereit valamint a virtuális alaposztályra mutató pointereket is. (További információ: <a href="https://en.wikipedia.org/wiki/Virtual_method_table">Wikipedia</a>)</blockquote>
 		<table class="obj-wrapper bordered">
 			<tr><th>#</th><th>Folyamat</th><th>Példa</th></tr>
 			<tr><td><b>1.</b></td><td>Virtuális alaposztályok konstruktorai</td><td>Person</td></tr>
@@ -136,6 +136,21 @@
 		<p class="img-wrapper"><img src="img/virtual.gif"></p>
 		<p>Az objektum megszűnése a táblázatban lentről felfele történik a konstruktor=destruktor, beírás=törlés helyettesítésekkel.</p>
 
+		<blockquote class="example">
+			A fent említett sorrendből következik, hogy a konstruktorban hívott virtuális metódus nem a leszármazottét hívja hanem a saját metódusát, ugyanis a konstruktorhívás előbb fut le mint hogy a virtuális tábla létrejön.
+			<pre><code class="language-cpp">
+			struct A {
+				A() { foo(); }
+				virtual void foo() { std::cout << "A::foo\n"; }
+			};
+
+			struct B : public A {
+				void foo() { std::cout << "B::foo\n"; }
+			};
+			//...
+			B b; // A::foo
+			</code></pre>
+		</blockquote>
 		<hr>
 		<h5>Típuskonverzió</h5>
 		<p>A heterogén kollekciónál megismertük, hogy a példányok pointerei milyen módon kompatibilisek. Az virtuális öröklések bevezetésével most lehetőség nyílik a pointerek egymásba való alakítására. Ez a folyamat a típuskonverzió.</p>
@@ -281,7 +296,7 @@
 
 			<p>Ezen gráfok szerializációs sorrendje/módja:</p>
 			<ol>
-				<li>A fát a gyökértől indulva szerializálhatjuk.</li>
+				<li>A fát a gyökértől indulva rekurzíven szerializálhatjuk.</li>
 				<li>A DAG-nak egy topologikus sorrendjében lehet szerializálni.</li>
 				<li>Valahonnan elkezdjük bejárni és egy listában tároljuk, hogy mit szerializáltunk már, és ha valamit szerializáltunk, azt mégegyszer már nem kell.</li>
 			</ol>

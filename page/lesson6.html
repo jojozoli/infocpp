@@ -115,9 +115,64 @@
 		<p>Erre a megoldás - a két formátum "összegyúrása" - a <b>.hpp</b> kiterjesztésű fájl, melyben a sablonok deklarációja és definíciója is megtalálható.</p>
 		<hr>
 		<blockquote class="extra">
-		<h5>Futtathatók</h5>
-		<h5>Lambda-kifejezések</h5>
+		<h5>Hívhatók</h5>
+		<blockquote><b>Hívható:</b> Minden olyan <i>dolog</i>, ami függvényként értelmezhető és lefuttatható.</blockquote>
+		<p>
+			C++ a következők számítanak hívhatónak:
+			<ul class="browser-default">
+				<li>C sítlusú függvénypointer</li>
+				<li>Objektumok metódusainak pointerei</li>
+				<li>Függvényobjektumok</li>
+				<li>Lambda kifejezések</li>
+			</ul>
+		</p>
+		<p>Hívhatót lehet átadni a fent mutatott sablonos módszerrel, azonban sokkal átláthatóbb/modernebb ha a paraméterünk <b>std::function</b> osztályt kérünk. Ennek ugyanis a fenti listából bármi adható.</p>
+		<blockquote>Az <b>std::function</b> sablonparamétere: <b>std::function&lt;VisszaTípus(Arg1, Arg2, ...)&gt;</b></blockquote>
 
+		<pre><code class="language-cpp">
+		template&lt;typename T&gt;
+		size_t countArray(T* arr, size_t len, std::function&lt;bool(T)&gt; func) {
+			int counter = 0;
+			for(size_t i = 0; i < len; i++)
+				if (func(arr[i]))
+					counter++;
+			return counter;
+		}
+		//...
+		bool isPositive(int num) { return num >= 0; }
+
+		struct Poz { 
+			bool operator()(int num) { return num >= 0; }
+		};
+		//...
+		int arr[] = { -1, 22, 433, -544, 6543, 666, -420 };
+
+		countArray&lt;int&gt;(arr, 7, &amp;isPositive);
+		countArray&lt;int&gt;(arr, 7, Poz);
+		</code></pre>
+
+		<h5>Lambda-kifejezések</h5>
+		<blockquote><b>Lambda-kifejezés:</b> Egy név nélküli függvényobjektum.</blockquote>
+		<p>A lambda kifejezéseket általában arra használjuk, hogy ahol hívhatót kérnek oda helyben le tudjuk írni a függvényünket, ezzel átláthatóbbá téve a kódot.</p>
+		<pre><code class="language-cpp">
+		// Általános lambda kifejezés
+		[capture](params){body}
+		</code></pre>
+		<ul class="browser-default">
+			<li><b>capture</b>: Azon külső lokális változók listája, melyeket szeretnénk a függvényünkben használni. A <b>&amp;</b> jellel minden lokális változót elkaphatunk.</li>
+			<li><b>params</b>: A függvény paraméterlistája.</li>
+			<li><b>body</b>: A függvény törzse.</li>
+		</ul>
+
+		<pre><code class="language-cpp">
+		countArray&lt;int&gt;(arr, 7, [](int num) { return num >= 0; });
+		</code></pre>
+
+		<pre><code class="language-cpp">
+		int N = 300;
+		countArray&lt;int&gt;(arr, 7, [N](int num) { return num >= N; });
+		</code></pre>
+		<p>Itt elég nagy vonalakban írtam a lambda kifejezésekről, ezen felül rengeteg felhasználási módja és alakja létezik.</p>
 		</blockquote>
 	</body>
 </html>
