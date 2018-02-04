@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta charset="UTF-8"/>
+		<title>InfoC++2 :: Példatár</title>
+		<script src="js/prism.js"></script>
+	</head>
+
+	<body>
+		<h4>Példatár</h4><hr>
+		<p>Minden tananyag fejetehez található néhány gyakorló feladat. A végén találhatók <i>mit ír ki</i> típusú feladatok. A megoldások a feldatok alatt legördítve tekintehetők meg.</p><hr>
+
+		<p><b>1/1.</b> Írj egy olyan <b>min</b> függvényt mely megadja a két paramétere közül a kisebbet. A függvény működjön <b>int</b>, <b>double</b> és <b>const char*</b> típusokkal.</p>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li><div class="collapsible-header">Megoldás</div><div class="collapsible-body"><pre><code class="language-cpp">
+				int min(int a, int b) { return (a < b)?a:b; }
+				double min(double a, double b) { return (a < b)?a:b; }
+				const char* min(const char* a, const char* b) { return (strcmp(a ,b) <= 0)?a:b; }
+			</code></pre></div></li>
+		</ul>
+		
+		<p><b>1/2.</b> Írj egy olyan <b>swap</b> függvényt mely két <b>int</b> referenciát tud megcserélni. (Írd meg a pointeres változatot is).</p>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li><div class="collapsible-header">Megoldás</div><div class="collapsible-body"><pre><code class="language-cpp">
+				void swapR(int&amp; a, int&amp; b){
+					int tmp = a;
+					a = b;
+					b = tmp;
+				}
+
+				void swapP(int* a, int* b){
+					int tmp = *a;
+					*a = *b;
+					*b = tmp;
+				}
+			</code></pre></div></li>
+		</ul>
+
+		<p><b>1/3.</b> Hozz létre egy <b>Math</b> nevű névteret, melyben létrehozod a <b>PI</b> konstanst és egy radiánból fokra váltó <b>rad2deg</b> és a fordított <b>deg2rad</b> függvényeket. Írj hozzá példakódot is.</p>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li><div class="collapsible-header">Megoldás</div><div class="collapsible-body"><pre><code class="language-cpp">
+				namespace Math {
+					const double PI = 3.14159;
+
+					double rad2deg(double rad) { return  180 * rad / PI; }
+					double deg2rad(double deg) { return  PI * deg / 180; }
+				}
+
+				std::cout << "72° in rads: " << Math::deg2rad(72) << '\n';
+				std::cout << "PI  in degs: " << Math::rad2deg(Math::PI) << '\n';
+			</code></pre></div></li>
+		</ul>
+
+		<!--
+		
+		<p><b>1/1.</b> </p>
+		<ul class="collapsible" data-collapsible="accordion">
+			<li><div class="collapsible-header">Megoldás</div><div class="collapsible-body"><pre><code class="language-cpp">
+				
+			</code></pre></div></li>
+		</ul>
+
+		-->
+
+		<script>
+			$(document).ready(function(){
+				$('.collapsible').collapsible();
+			});
+		</script>
+	</body>
+</html>

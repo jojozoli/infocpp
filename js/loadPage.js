@@ -1,5 +1,10 @@
+var fromload = false;
+
 function loadPage(id, push) {
+	fromload = true;
+	location.hash = id
 	$('.container').html("<div class='green white-text center'>Betöltés...</div>")
+
 	$.post('requestPage.php', {page: id}, function(data){
 
 		data = JSON.parse(data);
@@ -18,4 +23,12 @@ function loadPage(id, push) {
 		$('.container').html("<div class='red white-text center'>Hiba a betöltés során</div>")
 	})
 	$('.button-collapse').sideNav('hide');
+}
+
+window.onhashchange = function() {
+	if(!fromload)
+		loadPage(location.hash.split('#')[1], true)
+	else
+		fromload = false
+	console.log(location.hash)
 }

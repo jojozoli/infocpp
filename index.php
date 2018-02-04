@@ -94,7 +94,6 @@
 				$(".button-collapse").sideNav();
 
 				var page = sessionStorage.getItem('lastPage');
-				console.log(page)
 				if(page == null)
 					loadPage("TTL", false)
 				else
@@ -103,7 +102,6 @@
 			});
 
 			window.onpopstate = function(e) {
-				console.log(e, e.state)
 				if(e.state != undefined && e.state != null) loadPage(e.state.page, false);
 			}
 		</script>
